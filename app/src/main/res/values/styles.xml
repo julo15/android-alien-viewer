@@ -1,0 +1,46 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppThemeSplash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppThemeTranslucent" parent="AppTheme">
+        <item name="android:windowBackground">@color/darkened_background</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="PostText" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">@dimen/post_text_text_size</item>
+    </style>
+
+    <style name="PostLinkText" parent="PostText">
+    </style>
+
+    <style name="ImageOverlayText" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/image_overlay_text_size</item>
+        <item name="android:background">@drawable/image_overlay_text_background</item>
+        <item name="android:paddingTop">@dimen/text_box_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/text_box_padding_vertical</item>
+        <item name="android:paddingLeft">@dimen/text_box_padding_horizontal</item>
+        <item name="android:paddingRight">@dimen/text_box_padding_horizontal</item>
+    </style>
+
+    <style name="ImageOverlayTextNsfw" parent="ImageOverlayText">
+        <item name="android:textColor">@color/nsfw_red</item>
+        <item name="android:background">@drawable/image_overlay_text_background_nsfw_red</item>
+    </style>
+
+    <style name="SplashTextAppearance" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+</resources>

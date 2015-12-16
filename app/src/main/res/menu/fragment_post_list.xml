@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!--
+    <item android:id="@+id/menu_item_add_subreddit"
+          android:icon="@drawable/ic_menu_add"
+          android:title="@string/add_subreddit"
+          app:showAsAction="ifRoom" />
+    <item android:id="@+id/menu_item_search"
+          android:icon="@drawable/ic_search"
+          android:title="@string/filter_subreddit_list"
+          app:actionViewClass="android.support.v7.widget.SearchView"
+          app:showAsAction="ifRoom" />-->
+    <item android:id="@+id/menu_item_refresh_list"
+          android:icon="@drawable/ic_refresh"
+          android:title="@string/refresh_subreddit_list"
+          app:showAsAction="ifRoom" />
+    <!--
+    <item android:id="@+id/menu_item_toggle_nsfw"
+          android:title="@string/hide_nsfw"
+          app:showAsAction="never" />-->
+    <item android:id="@+id/menu_item_refresh_token"
+          android:title="@string/refresh_token"
+          app:showAsAction="never" />
+    <item android:id="@+id/menu_item_subreddit_view"
+          android:title="@string/subreddit_view"
+          app:showAsAction="never" />
+</menu>

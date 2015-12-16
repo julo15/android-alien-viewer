@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">AlienViewer</string>
+
+    <string name="subscribers_format">%1$d subscribers</string>
+    <string name="add_subreddit">Add subreddit</string>
+    <string name="subreddit_prompt">Enter subreddit name:</string>
+    <string name="refresh_token">Refresh token</string>
+    <string name="no_image_album">No more images!</string>
+    <string name="subreddit_freshness">Newest post: %1$s</string>
+    <string name="more_images">More!</string>
+    <string name="refresh_subreddit_list">Refresh list</string>
+    <string name="fetching_subs_progress">Fetching subscribed subs...</string>
+    <string name="fetching_sub_posts_progress">Fetching posts (%1$s/%2$s)...</string>
+    <string name="sorting_subs_progress">"Sorting subs...</string>
+    <string name="splash_text">Welcome to AlienViewer</string>
+    <string name="show_nsfw">Show NSFW</string>
+    <string name="hide_nsfw">Hide NSFW</string>
+    <string name="filter_subreddit_list">Filter subreddits</string>
+    <string name="post_view">Go to post view</string>
+    <string name="subreddit_view">Go to subreddit view</string>
+    <string name="fetching_posts_progress">Fetching posts...</string>
+    <string name="post_item_description">On r/%1$s\n(%2$d comments)</string>
+    <string name="subreddit_format">r/%1$s</string>
+    <string name="comments_format_link"><u>%1$d comments</u></string>
+    <string name="nsfw">NSFW</string>
+    <string name="voting_not_supported_toast">Up/down voting not supported yet :(</string>
+</resources>

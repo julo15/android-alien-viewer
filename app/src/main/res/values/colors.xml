@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#035</color>
+    <color name="colorPrimaryDark">#024</color>
+    <color name="colorAccent">#aa6622</color>
+    <color name="darkened_background">#a000</color>
+    <color name="nsfw_red">#f55</color>
+    <color name="link_text">#3366ff</color>
+</resources>

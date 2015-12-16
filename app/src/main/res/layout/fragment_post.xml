@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ImageView
+        android:id="@+id/fragment_post_image_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:padding="@dimen/padding_normal"
+        android:background="@color/darkened_background"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/fragment_post_image_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/fragment_post_image_url_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/fragment_post_image_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/padding_normal"
+        android:layout_gravity="top|right"
+        android:visibility="gone"
+        style="@android:style/Widget.ProgressBar" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:layout_margin="@dimen/padding_normal">
+
+        <TextView
+            android:id="@+id/fragment_post_image_more_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:padding="@dimen/spacing_normal"
+            android:textColor="@android:color/white"
+            android:background="#a000"
+            android:text="@string/more_images" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fragment_post_image_open_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/ic_search"
+            android:clickable="true"
+            tools:text="More!" />
+
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
