@@ -6,7 +6,9 @@ import android.util.Log;
 
 import com.julo.android.alienviewer.imgur.Imgur;
 import com.julo.android.alienviewer.util.Util;
+import com.squareup.okhttp.Authenticator;
 import com.squareup.okhttp.Credentials;
+import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -18,6 +20,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +41,7 @@ public class Reddit {
             .build();
     private static final Uri AUTHORIZE_URI = API_ENDPOINT
             .buildUpon()
-            .appendPath("authorize")
+            .appendPath("authorize.compact")
             .appendQueryParameter("client_id", CLIENT_ID)
             .appendQueryParameter("response_type", "code")
             .appendQueryParameter("redirect_uri", REDIRECT_URI)
@@ -69,6 +72,28 @@ public class Reddit {
         boolean filter(T item);
     }
 
+    public static class Tokens {
+        private String mAccessToken;
+        private String mRefreshToken;
+
+        public Tokens(String access, String refresh) {
+            if (access == null) {
+                throw new IllegalArgumentException("Can't have null access token");
+            }
+
+            mAccessToken = access;
+            mRefreshToken = refresh;
+        }
+
+        public String getAccessToken() {
+            return mAccessToken;
+        }
+
+        public String getRefreshToken() {
+            return mRefreshToken;
+        }
+    }
+
     public static class AuthenticationException extends Exception {
     }
 
@@ -77,14 +102,35 @@ public class Reddit {
     }
 
     private OkHttpClient mHttpClient = new OkHttpClient();
-    private String mAccessToken;
+    private Tokens mTokens;
 
-    public Reddit(String accessToken) {
-        mAccessToken = accessToken;
-    }
+    public Reddit(Tokens tokens) {
+        mTokens = tokens;
 
-    public String getAccessToken() {
-        return mAccessToken;
+        mHttpClient.setAuthenticator(new Authenticator() {
+            @Override
+            public Request authenticate(Proxy proxy, Response response) throws IOException {
+                if (mTokens == null || mTokens.getRefreshToken() == null) {
+                    return null;
+                }
+
+                try {
+                    fetchRefreshedAccessToken(mTokens.getRefreshToken());
+                } catch (JSONException je) {
+                    Log.e(TAG, "Got JSON exception attempting to refresh access token in authenticator", je);
+                    return null;
+                }
+
+                return response.request().newBuilder()
+                        .header("Authorization", "bearer " + mTokens.getAccessToken())
+                        .build();
+            }
+
+            @Override
+            public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
+                return null;
+            }
+        });
     }
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -160,7 +206,7 @@ public class Reddit {
     private Request.Builder newAccessTokenRequestBuilder(String url) {
         return new Request.Builder()
                 .url(url)
-                .header("Authorization", "bearer " + mAccessToken);
+                .header("Authorization", "bearer " + mTokens.getAccessToken());
     }
 
     public List<Subreddit> fetchSubscribedSubreddits(int limit, final Filterer<Subreddit> filterer) throws IOException, JSONException, AuthenticationException {
@@ -208,18 +254,15 @@ public class Reddit {
                 .build();
     }
 
-    public String fetchAccessToken(Context context, String code) throws IOException, JSONException {
-        String data = ACCESS_TOKEN_API
-                .buildUpon()
-                .appendQueryParameter("grant_type", "authorization_code")
-                .appendQueryParameter("redirect_uri", REDIRECT_URI)
-                .appendQueryParameter("code", code)
-                .build()
-                .getQuery();
-        RequestBody body = RequestBody.create(null, data);
+    public Tokens fetchTokens(String code) throws IOException, JSONException {
+        RequestBody body = new FormEncodingBuilder()
+                .add("grant_type", "authorization_code")
+                .add("redirect_uri", REDIRECT_URI)
+                .add("code", code)
+                .build();
         Request request = new Request.Builder()
                 .url(ACCESS_TOKEN_API.toString())
-                .addHeader("Authorization", Credentials.basic(CLIENT_ID, ""))
+                .header("Authorization", Credentials.basic(CLIENT_ID, ""))
                 .post(body)
                 .build();
         Response response = mHttpClient.newCall(request).execute();
@@ -228,8 +271,29 @@ public class Reddit {
         Log.i(TAG, "Got access token response: " + responseBody);
 
         JSONObject jsonData = new JSONObject(responseBody);
-        mAccessToken = jsonData.getString("access_token");
-        return mAccessToken;
+        mTokens = new Tokens(jsonData.getString("access_token"),
+                jsonData.optString("refresh_token", null));
+        return mTokens;
+    }
+
+    private Tokens fetchRefreshedAccessToken(String refreshToken) throws IOException, JSONException {
+        RequestBody body = new FormEncodingBuilder()
+                .add("grant_type", "refresh_token")
+                .add("refresh_token", refreshToken)
+                .build();
+        Request request = new Request.Builder()
+                .url(ACCESS_TOKEN_API.toString())
+                .header("Authorization", Credentials.basic(CLIENT_ID, ""))
+                .post(body)
+                .build();
+        Response response = mHttpClient.newCall(request).execute();
+
+        String responseBody = response.body().string();
+        Log.i(TAG, "Got refreshed access token response: " + responseBody);
+
+        JSONObject jsonData = new JSONObject(responseBody);
+        mTokens = new Tokens(jsonData.getString("access_token"), mTokens.getRefreshToken());
+        return mTokens;
     }
 
     public List<Post> fetchPosts(String subreddit) throws IOException, JSONException {
@@ -265,7 +329,7 @@ public class Reddit {
 
     public List<Post> fetchPosts(Integer limit, final PostFilterer filterer)
             throws AuthenticationException, IOException, JSONException {
-        boolean useOAuth = (mAccessToken != null);
+        boolean useOAuth = (mTokens != null);
         Uri baseUri = useOAuth ? OAUTH_ENDPOINT : ENDPOINT;
         Uri.Builder uriBuilder = baseUri
                 .buildUpon()

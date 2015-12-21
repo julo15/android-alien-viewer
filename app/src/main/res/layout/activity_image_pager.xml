@@ -81,31 +81,64 @@
                 style="@style/PostText"
                 tools:text="Miranda Kerr" />
 
-            <TextView
-                android:id="@+id/activity_image_pager_subreddit_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/PostText"
-                tools:text="r/gentlemanboners"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/activity_image_pager_comments_count_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/PostText"
-                android:textColor="@color/link_text"
-                android:autoLink="all"
-                tools:text="124 comments" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginRight="@dimen/spacing_normal">
 
-            <TextView
-                android:id="@+id/activity_image_pager_freshness_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/PostText"
-                android:textColor="@color/colorAccent"
-                tools:text="3 minutes ago"/>
+                    <TextView
+                        android:id="@+id/activity_image_pager_subreddit_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/PostText"
+                        tools:text="r/gentlemanboners"/>
+
+                    <TextView
+                        android:id="@+id/activity_image_pager_comments_count_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/PostText"
+                        android:textColor="@color/link_text"
+                        android:autoLink="all"
+                        tools:text="124 comments" />
+
+                    <TextView
+                        android:id="@+id/activity_image_pager_freshness_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/PostText"
+                        android:textColor="@color/colorAccent"
+                        tools:text="3 minutes ago"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_below="@id/activity_image_pager_title_text_view"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true">
+
+                    <ImageView
+                        android:id="@+id/activity_image_pager_link_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_link_black_24dp"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
+
+
 
     </LinearLayout>
 

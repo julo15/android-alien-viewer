@@ -14,6 +14,7 @@ public class Preferences {
 
     private static final String PREF_SUBREDDITS = "subreddits";
     private static final String PREF_ACCESS_TOKEN = "access_token";
+    private static final String PREF_REFRESH_TOKEN = "refresh_token";
     private static final String PREF_NSFW_ALLOWED = "nsfw_allowed";
     private static final String PREF_USER_NAME = "user_name";
 
@@ -50,6 +51,17 @@ public class Preferences {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putString(PREF_ACCESS_TOKEN, accessToken)
+                .commit();
+    }
+
+    public static String getRefreshToken(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_REFRESH_TOKEN, null);
+    }
+
+    public static void setRefreshToken(Context context, String accessToken) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(PREF_REFRESH_TOKEN, accessToken)
                 .commit();
     }
 

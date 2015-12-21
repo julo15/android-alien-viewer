@@ -156,15 +156,7 @@ public class SubredditListFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 fetchSubreddits(query);
-
-                // Hide the keyboard.
-                mSearchView.clearFocus();
-
-                // Just calling setIconified(true) will clear the query, but not collapse the SearchView.
-                // This combo of setQuery + setIconified does work, although not exactly sure why.
-                mSearchView.setQuery("", false);
-                mSearchView.setIconified(true);
-
+                Util.hideSearchView(mSearchView);
                 return true;
             }
 
@@ -198,7 +190,7 @@ public class SubredditListFragment extends Fragment {
                 fetchSubreddits(null);
                 return true;
 
-            case R.id.menu_item_refresh_token: {
+            case R.id.menu_item_log_in: {
                 Intent intent = AuthorizeActivity.newIntent(getActivity());
                 startActivityForResult(intent, REQUEST_AUTHORIZE);
                 return true;
@@ -342,7 +334,7 @@ public class SubredditListFragment extends Fragment {
     private class LoadSubredditsTask extends AsyncTask<Void,Void,Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            Reddit reddit = new Reddit(Preferences.getAccessToken(getActivity()));
+            Reddit reddit = new Reddit(Util.getRedditTokensFromPreferences(getActivity()));
             for (Subreddit subreddit : mSubreddits) {
                 reddit.loadSubreddit(subreddit);
             }
@@ -397,8 +389,8 @@ public class SubredditListFragment extends Fragment {
         private List<Subreddit> fetchSubredditsByNewestPost(final String query)
                 throws Reddit.AuthenticationException, JSONException, IOException {
             publishProgress(getResources().getString(R.string.fetching_subs_progress));
-            String accessToken = Preferences.getAccessToken(getActivity());
-            List<Subreddit> subreddits = new Reddit(accessToken).fetchSubscribedSubreddits(100, new Reddit.Filterer<Subreddit>() {
+            Reddit.Tokens tokens = Util.getRedditTokensFromPreferences(getActivity());
+            List<Subreddit> subreddits = new Reddit(tokens).fetchSubscribedSubreddits(100, new Reddit.Filterer<Subreddit>() {
                 @Override
                 public boolean filter(Subreddit item) {
                     return ((query == null) || item.getName().toLowerCase().contains(query.toLowerCase()));
@@ -465,7 +457,7 @@ public class SubredditListFragment extends Fragment {
         private List<Subreddit> fetchSubredditsByHotPosts()
             throws Reddit.AuthenticationException, JSONException, IOException {
             List<String> subredditNames = new ArrayList<>();
-            List<Post> posts = new Reddit(Preferences.getAccessToken(getActivity())).fetchPosts(200, Util.IMAGE_POST_FILTERER);
+            List<Post> posts = new Reddit(Util.getRedditTokensFromPreferences(getActivity())).fetchPosts(200, Util.IMAGE_POST_FILTERER);
 
             boolean allowNsfw = Preferences.isNsfwAllowed(getActivity());
 

@@ -3,42 +3,54 @@ package com.julo.android.alienviewer.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 
+import com.julo.android.alienviewer.R;
 import com.julo.android.alienviewer.fragments.PostListFragment;
 import com.julo.android.alienviewer.fragments.SubredditListFragment;
 
 /**
  * Created by julianlo on 12/15/15.
  */
-public class MainListActivity extends SelectSingleFragmentActivity
+public class MainListActivity extends SingleFragmentActivity
         implements SubredditListFragment.Callbacks, PostListFragment.Callbacks {
 
-    private static final int FRAGMENT_SUBREDDITS = 1;
-    private static final int FRAGMENT_POSTS = 0;
+    private static final String EXTRA_SUBREDDIT = "com.julo.android.alienviewer.subreddit";
 
     public static Intent newIntent(Context context) {
-        return new Intent(context, MainListActivity.class);
+        return newIntent(context, null);
+    }
+
+    public static Intent newIntent(Context context, String subreddit) {
+        Intent intent = new Intent(context, MainListActivity.class);
+        intent.putExtra(EXTRA_SUBREDDIT, subreddit);
+        return intent;
     }
 
     @Override
-    protected Fragment createFragment(int i) {
-        switch (i) {
-            case FRAGMENT_SUBREDDITS:
-                return SubredditListFragment.newInstance();
-            case FRAGMENT_POSTS:
-                return PostListFragment.newInstance();
-            default:
-                throw new ArrayIndexOutOfBoundsException("Bad fragment index");
+    protected Fragment createFragment() {
+        // This only gets called on initial create since all the fragments we use here are retained.
+        if (getIntent().getStringExtra(EXTRA_SUBREDDIT) != null) {
+            return PostListFragment.newInstance(getIntent().getStringExtra(EXTRA_SUBREDDIT));
+        } else {
+            return PostListFragment.newInstance();
         }
     }
 
     @Override
     public void onSwitchToPostsSelected() {
-        setCurrentFragment(FRAGMENT_POSTS);
+        replaceFragment(PostListFragment.newInstance());
     }
 
     @Override
     public void onSwitchToSubredditsSelected() {
-        setCurrentFragment(FRAGMENT_SUBREDDITS);
+        replaceFragment(SubredditListFragment.newInstance());
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fm = getSupportFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
 }

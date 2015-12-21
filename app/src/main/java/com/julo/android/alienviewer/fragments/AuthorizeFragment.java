@@ -40,7 +40,7 @@ public class AuthorizeFragment extends BaseWebViewFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_base_web_view, container, false);
 
-        Uri authorizeUri = new Reddit(null).getAuthorizeUri(false, "identity,mysubreddits,read");
+        Uri authorizeUri = new Reddit(null).getAuthorizeUri(true, "identity,mysubreddits,read");
         Log.i(TAG, "Got authorize URL: " + authorizeUri.toString());
 
         initializeWebView(view, R.id.fragment_base_web_view_web_view, R.id.fragment_base_web_view_progress_bar, new BaseWebViewClient() {

@@ -4,7 +4,8 @@
     <string name="subscribers_format">%1$d subscribers</string>
     <string name="add_subreddit">Add subreddit</string>
     <string name="subreddit_prompt">Enter subreddit name:</string>
-    <string name="refresh_token">Refresh token</string>
+    <string name="log_in">Log in</string>
+    <string name="log_out">Log out</string>
     <string name="no_image_album">No more images!</string>
     <string name="subreddit_freshness">Newest post: %1$s</string>
     <string name="more_images">More!</string>
@@ -24,4 +25,8 @@
     <string name="comments_format_link"><u>%1$d comments</u></string>
     <string name="nsfw">NSFW</string>
     <string name="voting_not_supported_toast">Up/down voting not supported yet :(</string>
+    <string name="random_subreddit">Random sub!</string>
+    <string name="subreddit_search_hint">Type subreddit name...</string>
+    <string name="clear_search">Clear subreddit filter</string>
+    <string name="subreddit_info_bar">Showing r/%1$s</string>
 </resources>

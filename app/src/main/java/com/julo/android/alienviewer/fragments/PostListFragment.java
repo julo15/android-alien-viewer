@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +42,8 @@ import java.util.List;
 public class PostListFragment extends Fragment {
     private static final String TAG = "PostListFragment";
 
+    private static final String ARG_SUBREDDIT = "subreddit";
+
     private static final int REQUEST_AUTHORIZE = 1;
 
     private static final int FETCH_TASK_STATE_NOT_RUN = 0;
@@ -50,12 +53,25 @@ public class PostListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private View mProgressView;
     private TextView mProgressTextView;
+    private TextView mInfoBarTextView;
+    private View mInfoBarView;
+
     private List<Post> mPosts = new ArrayList<>();
     private FetchPostsTask mFetchPostsTask;
     private int mFetchTaskState = FETCH_TASK_STATE_NOT_RUN;
+    private FetchParameters mFetchParameters;
+    private String mSearchQuery;
 
     public static PostListFragment newInstance() {
         return new PostListFragment();
+    }
+
+    public static PostListFragment newInstance(String subreddit) {
+        Bundle args = new Bundle();
+        args.putString(ARG_SUBREDDIT, subreddit);
+        PostListFragment fragment = new PostListFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public interface Callbacks {
@@ -67,6 +83,13 @@ public class PostListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true); // so we don't need to requery reddit on rotation
+
+        String subreddit = null;
+        Bundle args = getArguments();
+        if (args != null) {
+            subreddit = args.getString(ARG_SUBREDDIT);
+        }
+        setSubredditSearch(subreddit, false); // don't put it in the search view
     }
 
     @Nullable
@@ -82,20 +105,26 @@ public class PostListFragment extends Fragment {
         mProgressTextView = Util.findView(view, R.id.progress_full_progress_text_view);
         mProgressTextView.setText(R.string.fetching_posts_progress);
 
+        mInfoBarTextView = Util.findView(view, R.id.info_bar_view_text_view);
+        mInfoBarView = Util.findView(view, R.id.info_bar_view);
+        mInfoBarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setSubredditSearch(null, true); // clear out the search view
+                fetchPosts();
+            }
+        });
+
+        /*
         if (Preferences.getAccessToken(getActivity()) == null) {
             startAuthorizeActivityForResult();
-        } else if (mFetchTaskState == FETCH_TASK_STATE_NOT_RUN) {
+        } else */ if (mFetchTaskState == FETCH_TASK_STATE_NOT_RUN) {
             fetchPosts();
         } else if (mFetchTaskState == FETCH_TASK_STATE_RUNNING) {
             showProgress(true);
         }
 
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     @Override
@@ -110,6 +139,41 @@ public class PostListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_post_list, menu);
+
+        //if (mSearchQuery != null) {
+            menu.findItem(R.id.menu_item_clear_search).setVisible(true);
+        //}
+
+        if (Preferences.getAccessToken(getActivity()) != null) {
+            menu.findItem(R.id.menu_item_log_in).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_item_log_out).setVisible(false);
+        }
+
+        final SearchView searchView = Util.cast(menu.findItem(R.id.menu_item_search).getActionView());
+        searchView.setQueryHint(getResources().getString(R.string.subreddit_search_hint));
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchView.setQuery(mSearchQuery, false);
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                setSubredditSearch(query, true);
+                fetchPosts();
+                Util.hideSearchView(searchView);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -119,9 +183,28 @@ public class PostListFragment extends Fragment {
                 fetchPosts();
                 return true;
 
-            case R.id.menu_item_refresh_token:
+            case R.id.menu_item_log_in:
                 Intent intent = AuthorizeActivity.newIntent(getActivity());
                 startActivityForResult(intent, REQUEST_AUTHORIZE);
+                return true;
+
+            case R.id.menu_item_log_out:
+                Util.setRedditTokensToPreferences(getActivity(), null);
+                Preferences.setUserName(getActivity(), null);
+                getActivity().invalidateOptionsMenu();
+                fetchPosts();
+                return true;
+
+            case R.id.menu_item_random_subreddit:
+                // Clear out the query, then search for a random subreddit
+                setSubredditSearch(null, true);
+                mFetchParameters = new FetchParameters().setDoRandomSubreddit(true);
+                fetchPosts();
+                return true;
+
+            case R.id.menu_item_clear_search:
+                setSubredditSearch(null, true);
+                fetchPosts();
                 return true;
 
             case R.id.menu_item_subreddit_view:
@@ -140,12 +223,29 @@ public class PostListFragment extends Fragment {
         }
 
         if (requestCode == REQUEST_AUTHORIZE) {
+            getActivity().invalidateOptionsMenu();
             fetchPosts();
         }
     }
 
+    private void setInfoBarText(String text) {
+        mInfoBarTextView.setText(text);
+    }
+
+    private void showInfoBar(boolean show) {
+        Util.showView(mInfoBarView, show);
+    }
+
     private void setupAdapter() {
         mRecyclerView.setAdapter(new PostAdapter(mPosts));
+    }
+
+    private void setSubredditSearch(String query, boolean isSearchQuery) {
+        if (isSearchQuery) {
+            mSearchQuery = query;
+            getActivity().invalidateOptionsMenu();
+        }
+        mFetchParameters = new FetchParameters().setSubreddit(query);
     }
 
     private void fetchPosts() {
@@ -153,7 +253,7 @@ public class PostListFragment extends Fragment {
             mFetchPostsTask.cancel(false);
         }
         mFetchPostsTask = new FetchPostsTask();
-        mFetchPostsTask.execute();
+        mFetchPostsTask.execute(mFetchParameters);
     }
 
     private void showProgress(boolean show) {
@@ -237,7 +337,25 @@ public class PostListFragment extends Fragment {
         }
     }
 
-    private class FetchPostsTask extends AsyncTask<Void,Void,List<Post>> {
+    private class FetchParameters {
+        public String subredditName;
+        public boolean findRandomSubreddit;
+
+        public FetchParameters setSubreddit(String name) {
+            subredditName = name;
+            return this;
+        }
+
+        public FetchParameters setDoRandomSubreddit(boolean random) {
+            findRandomSubreddit = random;
+            return this;
+        }
+    }
+
+    private class FetchPostsTask extends AsyncTask<FetchParameters,Void,List<Post>> {
+
+        private FetchParameters mTaskFetchParameters;
+        private String mRandomSubredditName;
 
         @Override
         protected void onPreExecute() {
@@ -246,10 +364,28 @@ public class PostListFragment extends Fragment {
         }
 
         @Override
-        protected List<Post> doInBackground(Void... params) {
+        protected List<Post> doInBackground(FetchParameters... params) {
             try {
-                List<Post> posts = new Reddit(Preferences.getAccessToken(getActivity())).fetchPosts(100, Util.IMAGE_POST_FILTERER);
-                return posts;
+                FetchParameters fetchParams = params[0];
+                mTaskFetchParameters = fetchParams;
+
+                final Reddit.Tokens tokens = Util.getRedditTokensFromPreferences(getActivity());
+                final int numPosts = 100;
+
+                if (fetchParams.subredditName != null) {
+                    String subreddit = fetchParams.findRandomSubreddit ? "random" : fetchParams.subredditName;
+                    return new Reddit(tokens).fetchPosts(subreddit, numPosts, Util.IMAGE_POST_FILTERER);
+                } else if (fetchParams.findRandomSubreddit) {
+                    return new Reddit(tokens).fetchPosts("random", numPosts, new Reddit.PostFilterer() {
+                        @Override
+                        public boolean filterPost(Post post) {
+                            mRandomSubredditName = post.getSubredditName();
+                            return Util.IMAGE_POST_FILTERER.filterPost(post);
+                        }
+                    });
+                } else {
+                    return new Reddit(tokens).fetchPosts(numPosts, Util.IMAGE_POST_FILTERER);
+                }
             } catch (Reddit.AuthenticationException ae) {
                 Log.w(TAG, "Access token expired", ae);
                 startAuthorizeActivityForResult();
@@ -267,6 +403,16 @@ public class PostListFragment extends Fragment {
             setupAdapter();
             showProgress(false);
             mFetchTaskState = FETCH_TASK_STATE_DONE;
+
+            String infoText = null;
+            if (mTaskFetchParameters.findRandomSubreddit) {
+                infoText = "Showing r/" + mRandomSubredditName;
+            } else if (mTaskFetchParameters.subredditName != null) {
+                infoText = "Showing r/" + mTaskFetchParameters.subredditName;
+            }
+
+            setInfoBarText(infoText);
+            showInfoBar(infoText != null);
         }
     }
 }

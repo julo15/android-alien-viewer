@@ -56,10 +56,19 @@ public class BaseWebViewFragment extends Fragment {
         mProgressBar.setMax(100);
 
         mWebView = Util.findView(root, R.id.fragment_base_web_view_web_view);
+
+        // Enabling these for Reddit auth support. Not sure about other implications of this though.
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
+
+        // Presumably I added this to get pinch zooming working, but don't fully recall.
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
+
+        // Get webpages to load zoomed out.
+        mWebView.getSettings().setLoadWithOverviewMode(true);
+        mWebView.getSettings().setUseWideViewPort(true);
+
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {

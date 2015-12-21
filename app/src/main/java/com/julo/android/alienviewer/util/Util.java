@@ -2,9 +2,11 @@ package com.julo.android.alienviewer.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.SearchView;
 import android.text.format.DateUtils;
 import android.view.View;
 
+import com.julo.android.alienviewer.Preferences;
 import com.julo.android.alienviewer.imgur.Imgur;
 import com.julo.android.alienviewer.reddit.Post;
 import com.julo.android.alienviewer.reddit.Reddit;
@@ -68,5 +70,26 @@ public class Util {
 
     public static String ensureUrlHasRedditPrefix(String url) {
         return Reddit.ENDPOINT.toString() + url;
+    }
+
+    public static void hideSearchView(SearchView searchView) {
+        // Hide the keyboard.
+        searchView.clearFocus();
+
+        // Just calling setIconified(true) will clear the query, but not collapse the SearchView.
+        // This combo of setQuery + setIconified does work, although not exactly sure why.
+        searchView.setQuery("", false);
+        searchView.setIconified(true);
+    }
+
+    public static Reddit.Tokens getRedditTokensFromPreferences(Context context) {
+        String accessToken = Preferences.getAccessToken(context);
+        String refreshToken = Preferences.getRefreshToken(context);
+        return (accessToken != null) ? new Reddit.Tokens(accessToken, refreshToken) : null;
+    }
+
+    public static void setRedditTokensToPreferences(Context context, Reddit.Tokens tokens) {
+        Preferences.setAccessToken(context, (tokens != null) ? tokens.getAccessToken() : null);
+        Preferences.setRefreshToken(context, (tokens != null) ? tokens.getRefreshToken() : null);
     }
 }

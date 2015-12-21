@@ -5,10 +5,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/fragment_post_list_recycler_view"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/info_bar_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/InfoBar">
+
+            <TextView
+                android:id="@+id/info_bar_view_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                style="@style/InfoBarText"
+                tools:text="Showing r/babes"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"/>
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/fragment_post_list_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
 
     <include layout="@layout/progress_full"
         tools:visibility="visible"/>

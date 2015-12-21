@@ -39,6 +39,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     private TextView mSubredditTextView;
     private TextView mFreshnessTextView;
     private TextView mKarmaTextView;
+    private View mLinkButton;
 
     public static Intent newIntent(Context context, Post post, String imageUrl) {
         Intent intent = new Intent(context, ImagePagerActivity.class);
@@ -87,6 +88,13 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
 
         mSubredditTextView = Util.findView(this, R.id.activity_image_pager_subreddit_text_view);
         mSubredditTextView.setText(getResources().getString(R.string.subreddit_format, mPost.getSubredditName()));
+        mSubredditTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = MainListActivity.newIntent(ImagePagerActivity.this, mPost.getSubredditName());
+                startActivity(intent);
+            }
+        });
 
         mFreshnessTextView = Util.findView(this, R.id.activity_image_pager_freshness_text_view);
         mFreshnessTextView.setText(Util.getRelativeTimeString(this, mPost.getCreatedUtc()));
@@ -98,6 +106,15 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
             public void onClick(View v) {
                 Toast.makeText(ImagePagerActivity.this, R.string.voting_not_supported_toast, Toast.LENGTH_SHORT)
                         .show();
+            }
+        });
+
+        mLinkButton = Util.findView(this, R.id.activity_image_pager_link_button);
+        mLinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = WebViewActivity.newIntent(ImagePagerActivity.this, mPost.getUrl());
+                startActivity(intent);
             }
         });
 
