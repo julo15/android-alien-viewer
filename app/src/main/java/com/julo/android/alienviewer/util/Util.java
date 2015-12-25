@@ -49,9 +49,9 @@ public class Util {
         return false;
     }
 
-    public static final Reddit.PostFilterer IMAGE_POST_FILTERER = new Reddit.PostFilterer() {
+    public static final Reddit.Filterer<Post> IMAGE_POST_FILTERER = new Reddit.Filterer<Post>() {
         @Override
-        public boolean filterPost(Post post) {
+        public boolean filter(Post post) {
             return (post.getImageUrl() != null);
         }
     };

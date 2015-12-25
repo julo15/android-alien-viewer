@@ -29,4 +29,5 @@
     <string name="subreddit_search_hint">Type subreddit name...</string>
     <string name="clear_search">Clear subreddit filter</string>
     <string name="subreddit_info_bar">Showing r/%1$s</string>
+    <string name="front_page">Front Page</string>
 </resources>

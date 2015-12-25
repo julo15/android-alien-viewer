@@ -1,6 +1,5 @@
 package com.julo.android.alienviewer.reddit;
 
-import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -63,10 +62,6 @@ public class Reddit {
             .appendPath("subreddits")
             .appendPath("mine")
             .build();
-
-    public interface PostFilterer {
-        boolean filterPost(Post post);
-    }
 
     public interface Filterer<T> {
         boolean filter(T item);
@@ -300,11 +295,11 @@ public class Reddit {
         return fetchPosts(subreddit, null);
     }
 
-    public List<Post> fetchPosts(String subreddit, final PostFilterer filterer) throws IOException, JSONException {
+    public List<Post> fetchPosts(String subreddit, final Filterer<Post> filterer) throws IOException, JSONException {
         return fetchPosts(subreddit, null, filterer);
     }
 
-    public List<Post> fetchPosts(String subreddit, Integer limit, final PostFilterer filterer) throws IOException, JSONException {
+    public List<Post> fetchPosts(String subreddit, Integer limit, final Filterer<Post> filterer) throws IOException, JSONException {
         Uri.Builder uriBuilder = ENDPOINT
                 .buildUpon()
                 .appendPath("r")
@@ -327,7 +322,7 @@ public class Reddit {
         }
     }
 
-    public List<Post> fetchPosts(Integer limit, final PostFilterer filterer)
+    public List<Post> fetchPosts(Integer limit, final Filterer<Post> filterer)
             throws AuthenticationException, IOException, JSONException {
         boolean useOAuth = (mTokens != null);
         Uri baseUri = useOAuth ? OAUTH_ENDPOINT : ENDPOINT;
@@ -345,7 +340,7 @@ public class Reddit {
         return fetchPosts(request, filterer);
     }
 
-    private List<Post> fetchPosts(Request request, final PostFilterer filterer)
+    private List<Post> fetchPosts(Request request, final Filterer<Post> filterer)
             throws AuthenticationException, JSONException, IOException {
         Response response = mHttpClient.newCall(request).execute();
         String responseBody = response.body().string();
@@ -361,7 +356,7 @@ public class Reddit {
             public Post parseItem(JSONObject itemJsonObject) throws IOException, JSONException {
                 Log.v(TAG, "Parsing post JSON:" + itemJsonObject.toString());
                 Post post = parsePost(itemJsonObject);
-                if ((post != null) && ((filterer == null) || filterer.filterPost(post))) {
+                if ((post != null) && ((filterer == null) || filterer.filter(post))) {
                     return post;
                 } else {
                     return null;

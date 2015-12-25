@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -51,8 +52,7 @@ public class PostListFragment extends Fragment {
     private static final int FETCH_TASK_STATE_DONE = 2;
 
     private RecyclerView mRecyclerView;
-    private View mProgressView;
-    private TextView mProgressTextView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView mInfoBarTextView;
     private View mInfoBarView;
 
@@ -101,9 +101,14 @@ public class PostListFragment extends Fragment {
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         setupAdapter();
 
-        mProgressView = Util.findView(view, R.id.progress_full_progress_view);
-        mProgressTextView = Util.findView(view, R.id.progress_full_progress_text_view);
-        mProgressTextView.setText(R.string.fetching_posts_progress);
+        mSwipeRefreshLayout = Util.findView(view, R.id.fragment_posts_list_swipe_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryLight, R.color.colorAccent);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchPosts();
+            }
+        });
 
         mInfoBarTextView = Util.findView(view, R.id.info_bar_view_text_view);
         mInfoBarView = Util.findView(view, R.id.info_bar_view);
@@ -256,8 +261,16 @@ public class PostListFragment extends Fragment {
         mFetchPostsTask.execute(mFetchParameters);
     }
 
-    private void showProgress(boolean show) {
-        Util.showView(mProgressView, show);
+    private void showProgress(final boolean show) {
+        // Even when called from the UI-thread, setRefreshing doesn't always
+        // show the refresh UI. This issue occurs in the fetch task's onPreExecute and
+        // on the fragment's onCreateView.
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(show);
+            }
+        });
     }
 
     private void startAuthorizeActivityForResult() {
@@ -376,11 +389,11 @@ public class PostListFragment extends Fragment {
                     String subreddit = fetchParams.findRandomSubreddit ? "random" : fetchParams.subredditName;
                     return new Reddit(tokens).fetchPosts(subreddit, numPosts, Util.IMAGE_POST_FILTERER);
                 } else if (fetchParams.findRandomSubreddit) {
-                    return new Reddit(tokens).fetchPosts("random", numPosts, new Reddit.PostFilterer() {
+                    return new Reddit(tokens).fetchPosts("random", numPosts, new Reddit.Filterer<Post>() {
                         @Override
-                        public boolean filterPost(Post post) {
+                        public boolean filter(Post post) {
                             mRandomSubredditName = post.getSubredditName();
-                            return Util.IMAGE_POST_FILTERER.filterPost(post);
+                            return Util.IMAGE_POST_FILTERER.filter(post);
                         }
                     });
                 } else {
@@ -404,7 +417,7 @@ public class PostListFragment extends Fragment {
             showProgress(false);
             mFetchTaskState = FETCH_TASK_STATE_DONE;
 
-            String infoText = null;
+            String infoText = getResources().getString(R.string.front_page);
             if (mTaskFetchParameters.findRandomSubreddit) {
                 infoText = "Showing r/" + mRandomSubredditName;
             } else if (mTaskFetchParameters.subredditName != null) {
