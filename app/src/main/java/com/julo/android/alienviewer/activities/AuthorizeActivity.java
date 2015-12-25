@@ -8,10 +8,10 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.julo.android.alienviewer.Preferences;
+import com.julo.android.alienviewer.Session;
 import com.julo.android.alienviewer.reddit.Reddit;
 import com.julo.android.alienviewer.fragments.AuthorizeFragment;
 import com.julo.android.alienviewer.reddit.User;
-import com.julo.android.alienviewer.util.Util;
 
 import org.json.JSONException;
 
@@ -49,7 +49,7 @@ public class AuthorizeActivity extends SingleFragmentActivity
     }
 
     private void finishActivity(Reddit.Tokens tokens, User user) {
-        Util.setRedditTokensToPreferences(AuthorizeActivity.this, tokens);
+        Session.getInstance().setNewTokens(tokens);
         Preferences.setUserName(AuthorizeActivity.this, (user != null) ? user.getName() : null);
 
         setResult(Activity.RESULT_OK);

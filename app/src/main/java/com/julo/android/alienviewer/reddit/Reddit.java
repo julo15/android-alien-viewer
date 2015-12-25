@@ -67,6 +67,10 @@ public class Reddit {
         boolean filter(T item);
     }
 
+    public interface Listener {
+        void onTokensChange(Tokens tokens);
+    }
+
     public static class Tokens {
         private String mAccessToken;
         private String mRefreshToken;
@@ -98,6 +102,7 @@ public class Reddit {
 
     private OkHttpClient mHttpClient = new OkHttpClient();
     private Tokens mTokens;
+    private Listener mListener;
 
     public Reddit(Tokens tokens) {
         mTokens = tokens;
@@ -142,6 +147,10 @@ public class Reddit {
 
     public JSONObject getUrlJSONObject(String urlSpec) throws IOException, JSONException {
         return new JSONObject(getUrlString(urlSpec));
+    }
+
+    public void setListener(Listener listener) {
+        mListener = listener;
     }
 
     public User fetchUser() throws JSONException, IOException, AuthenticationException {
@@ -189,6 +198,21 @@ public class Reddit {
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to load subreddit", ioe);
         }
+    }
+
+    private void updateTokens(String accessToken, String refreshToken) {
+        updateTokens(new Tokens(accessToken, refreshToken));
+    }
+
+    private void updateTokens(Tokens tokens) {
+        mTokens = tokens;
+        if (mListener != null) {
+            mListener.onTokensChange(mTokens);
+        }
+    }
+
+    public boolean isLoggedIn() {
+        return (mTokens != null);
     }
 
     private Uri getMySubredditsUri(String where) {
@@ -266,8 +290,7 @@ public class Reddit {
         Log.i(TAG, "Got access token response: " + responseBody);
 
         JSONObject jsonData = new JSONObject(responseBody);
-        mTokens = new Tokens(jsonData.getString("access_token"),
-                jsonData.optString("refresh_token", null));
+        updateTokens(jsonData.getString("access_token"), jsonData.optString("refresh_token"));
         return mTokens;
     }
 
@@ -287,7 +310,7 @@ public class Reddit {
         Log.i(TAG, "Got refreshed access token response: " + responseBody);
 
         JSONObject jsonData = new JSONObject(responseBody);
-        mTokens = new Tokens(jsonData.getString("access_token"), mTokens.getRefreshToken());
+        updateTokens(jsonData.getString("access_token"), mTokens.getRefreshToken());
         return mTokens;
     }
 

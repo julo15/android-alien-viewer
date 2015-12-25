@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.julo.android.alienviewer.Preferences;
 import com.julo.android.alienviewer.R;
 import com.julo.android.alienviewer.RedditManager;
+import com.julo.android.alienviewer.Session;
 import com.julo.android.alienviewer.ThumbnailDownloader;
 import com.julo.android.alienviewer.activities.AuthorizeActivity;
 import com.julo.android.alienviewer.activities.PostPagerActivity;
@@ -115,7 +116,7 @@ public class SubredditListFragment extends Fragment {
             showProgress(true);
         }
 
-        if (Preferences.getAccessToken(getActivity()) == null) {
+        if (!Session.getInstance().getReddit().isLoggedIn()) {
             startAuthorizeActivityForResult();
         } else if (mFetchTaskState == FETCH_TASK_STATE_NOT_RUN) {
             fetchSubreddits(null);
@@ -334,7 +335,7 @@ public class SubredditListFragment extends Fragment {
     private class LoadSubredditsTask extends AsyncTask<Void,Void,Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            Reddit reddit = new Reddit(Util.getRedditTokensFromPreferences(getActivity()));
+            Reddit reddit = Session.getInstance().getReddit();
             for (Subreddit subreddit : mSubreddits) {
                 reddit.loadSubreddit(subreddit);
             }
@@ -389,8 +390,8 @@ public class SubredditListFragment extends Fragment {
         private List<Subreddit> fetchSubredditsByNewestPost(final String query)
                 throws Reddit.AuthenticationException, JSONException, IOException {
             publishProgress(getResources().getString(R.string.fetching_subs_progress));
-            Reddit.Tokens tokens = Util.getRedditTokensFromPreferences(getActivity());
-            List<Subreddit> subreddits = new Reddit(tokens).fetchSubscribedSubreddits(100, new Reddit.Filterer<Subreddit>() {
+            Reddit reddit = Session.getInstance().getReddit();
+            List<Subreddit> subreddits = reddit.fetchSubscribedSubreddits(100, new Reddit.Filterer<Subreddit>() {
                 @Override
                 public boolean filter(Subreddit item) {
                     return ((query == null) || item.getName().toLowerCase().contains(query.toLowerCase()));
@@ -456,8 +457,9 @@ public class SubredditListFragment extends Fragment {
 
         private List<Subreddit> fetchSubredditsByHotPosts()
             throws Reddit.AuthenticationException, JSONException, IOException {
+            Reddit reddit = Session.getInstance().getReddit();
             List<String> subredditNames = new ArrayList<>();
-            List<Post> posts = new Reddit(Util.getRedditTokensFromPreferences(getActivity())).fetchPosts(200, Util.IMAGE_POST_FILTERER);
+            List<Post> posts = reddit.fetchPosts(200, Util.IMAGE_POST_FILTERER);
 
             boolean allowNsfw = Preferences.isNsfwAllowed(getActivity());
 

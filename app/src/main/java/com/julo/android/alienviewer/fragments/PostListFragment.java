@@ -19,10 +19,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.julo.android.alienviewer.BlurTransformation;
 import com.julo.android.alienviewer.Preferences;
 import com.julo.android.alienviewer.R;
+import com.julo.android.alienviewer.Session;
 import com.julo.android.alienviewer.activities.AuthorizeActivity;
 import com.julo.android.alienviewer.activities.ImagePagerActivity;
 import com.julo.android.alienviewer.reddit.Post;
@@ -149,7 +151,7 @@ public class PostListFragment extends Fragment {
             menu.findItem(R.id.menu_item_clear_search).setVisible(true);
         //}
 
-        if (Preferences.getAccessToken(getActivity()) != null) {
+        if (Session.getInstance().getReddit().isLoggedIn()) {
             menu.findItem(R.id.menu_item_log_in).setVisible(false);
         } else {
             menu.findItem(R.id.menu_item_log_out).setVisible(false);
@@ -194,7 +196,7 @@ public class PostListFragment extends Fragment {
                 return true;
 
             case R.id.menu_item_log_out:
-                Util.setRedditTokensToPreferences(getActivity(), null);
+                Session.getInstance().setNewTokens(null);
                 Preferences.setUserName(getActivity(), null);
                 getActivity().invalidateOptionsMenu();
                 fetchPosts();
@@ -382,14 +384,13 @@ public class PostListFragment extends Fragment {
                 FetchParameters fetchParams = params[0];
                 mTaskFetchParameters = fetchParams;
 
-                final Reddit.Tokens tokens = Util.getRedditTokensFromPreferences(getActivity());
+                Reddit reddit = Session.getInstance().getReddit();
                 final int numPosts = 100;
 
                 if (fetchParams.subredditName != null) {
-                    String subreddit = fetchParams.findRandomSubreddit ? "random" : fetchParams.subredditName;
-                    return new Reddit(tokens).fetchPosts(subreddit, numPosts, Util.IMAGE_POST_FILTERER);
+                    return reddit.fetchPosts(fetchParams.subredditName, numPosts, Util.IMAGE_POST_FILTERER);
                 } else if (fetchParams.findRandomSubreddit) {
-                    return new Reddit(tokens).fetchPosts("random", numPosts, new Reddit.Filterer<Post>() {
+                    return reddit.fetchPosts("random", numPosts, new Reddit.Filterer<Post>() {
                         @Override
                         public boolean filter(Post post) {
                             mRandomSubredditName = post.getSubredditName();
@@ -397,7 +398,7 @@ public class PostListFragment extends Fragment {
                         }
                     });
                 } else {
-                    return new Reddit(tokens).fetchPosts(numPosts, Util.IMAGE_POST_FILTERER);
+                    return reddit.fetchPosts(numPosts, Util.IMAGE_POST_FILTERER);
                 }
             } catch (Reddit.AuthenticationException ae) {
                 Log.w(TAG, "Access token expired", ae);
@@ -417,11 +418,20 @@ public class PostListFragment extends Fragment {
             showProgress(false);
             mFetchTaskState = FETCH_TASK_STATE_DONE;
 
-            String infoText = getResources().getString(R.string.front_page);
+            if (posts.size() == 0) {
+                Toast.makeText(getActivity(), R.string.no_image_posts, Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            String infoText;
             if (mTaskFetchParameters.findRandomSubreddit) {
                 infoText = "Showing r/" + mRandomSubredditName;
             } else if (mTaskFetchParameters.subredditName != null) {
                 infoText = "Showing r/" + mTaskFetchParameters.subredditName;
+            } else if (Preferences.getUserName(getActivity()) != null) {
+                infoText = getResources().getString(R.string.front_page_with_name, Preferences.getUserName(getActivity()));
+            } else {
+                infoText = getResources().getString(R.string.front_page);
             }
 
             setInfoBarText(infoText);
