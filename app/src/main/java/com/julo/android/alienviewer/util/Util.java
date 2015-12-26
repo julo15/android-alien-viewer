@@ -2,9 +2,13 @@ package com.julo.android.alienviewer.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.SearchView;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.julo.android.alienviewer.Preferences;
 import com.julo.android.alienviewer.imgur.Imgur;
@@ -91,5 +95,16 @@ public class Util {
     public static void setRedditTokensToPreferences(Context context, Reddit.Tokens tokens) {
         Preferences.setAccessToken(context, (tokens != null) ? tokens.getAccessToken() : null);
         Preferences.setRefreshToken(context, (tokens != null) ? tokens.getRefreshToken() : null);
+    }
+
+    public static void recycleImageViewDrawable(ImageView imageView) {
+        Drawable drawable = imageView.getDrawable();
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
+            if (bitmap != null) {
+                bitmap.recycle();
+                imageView.setImageDrawable(null);
+            }
+        }
     }
 }

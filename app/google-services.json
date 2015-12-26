@@ -1,0 +1,45 @@
+{
+  "project_info": {
+    "project_id": "alienviewer",
+    "project_number": "473076528886",
+    "name": "AlienViewer"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473076528886:android:d61cd59ec78dc3d3",
+        "client_id": "android:com.julo.android.alienviewer",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.julo.android.alienviewer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-49886063-5"
+          }
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

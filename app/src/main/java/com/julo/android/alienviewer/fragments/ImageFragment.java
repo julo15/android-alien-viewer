@@ -54,6 +54,8 @@ public abstract class ImageFragment extends Fragment {
             mProgressView.setVisibility(View.VISIBLE);
             Picasso.with(getActivity())
                     .load(Uri.parse(imageUrl))
+                    .fit()
+                    .centerInside()
                     .error(android.R.drawable.ic_delete)
                     .into(mImageView, new Callback() {
                         @Override

@@ -83,6 +83,8 @@ public class BaseImagePagerActivity extends AppCompatActivity {
         if (imageUrl != null) {
             Picasso.with(this)
                     .load(Uri.parse(imageUrl))
+                    .fit()
+                    .centerInside()
                     .into(mTransitionImageView);
         }
 

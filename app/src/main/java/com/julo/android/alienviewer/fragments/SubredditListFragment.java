@@ -170,6 +170,12 @@ public class SubredditListFragment extends Fragment {
         if (!Preferences.isNsfwAllowed(getActivity())) {
             menu.findItem(R.id.menu_item_toggle_nsfw).setTitle(R.string.show_nsfw);
         }
+
+        if (Session.getInstance().getReddit().isLoggedIn()) {
+            menu.findItem(R.id.menu_item_log_in).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_item_log_out).setVisible(false);
+        }
     }
 
     @Override
@@ -197,6 +203,13 @@ public class SubredditListFragment extends Fragment {
                 return true;
             }
 
+            case R.id.menu_item_log_out:
+                Session.getInstance().setNewTokens(null);
+                Preferences.setUserName(getActivity(), null);
+                getActivity().invalidateOptionsMenu();
+                fetchSubreddits(null);
+                return true;
+
             case R.id.menu_item_post_view: {
                 ((Callbacks)getActivity()).onSwitchToPostsSelected();
                 return true;
@@ -219,6 +232,7 @@ public class SubredditListFragment extends Fragment {
             new LoadSubredditsTask().execute();
         } else if (requestCode == REQUEST_AUTHORIZE) {
             updateUserName();
+            getActivity().invalidateOptionsMenu();
             fetchSubreddits(null);
         }
     }
@@ -302,6 +316,8 @@ public class SubredditListFragment extends Fragment {
             mImageUri = url;
             Picasso.with(getActivity())
                     .load(Uri.parse(url))
+                    .fit()
+                    .centerInside()
                     .into(mImageView);
         }
     }

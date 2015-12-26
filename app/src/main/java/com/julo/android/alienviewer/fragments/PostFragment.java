@@ -86,14 +86,8 @@ public class PostFragment extends ImageFragment {
         mOpenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String albumId = Imgur.extractAlbumIdFromUrl(mPost.getUrl());
-                if (albumId != null) {
                     Intent intent = ImagePagerActivity.newIntent(getActivity(), mPost, mPost.getImageUrl());
                     ImagePagerActivity.startWithTransition(getActivity(), intent, mImageView);
-                } else {
-                    Intent intent = WebViewActivity.newIntent(getActivity(), mPost.getUrl());
-                    startActivity(intent);
-                }
             }
         });
 

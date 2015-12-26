@@ -17,6 +17,7 @@ public class Preferences {
     private static final String PREF_REFRESH_TOKEN = "refresh_token";
     private static final String PREF_NSFW_ALLOWED = "nsfw_allowed";
     private static final String PREF_USER_NAME = "user_name";
+    private static final String PREF_ANALYTICS_ENABLED = "analytics_enabled";
 
     public static Set<String> getSubreddits(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getStringSet(PREF_SUBREDDITS, new HashSet<String>());
@@ -85,5 +86,21 @@ public class Preferences {
                 .edit()
                 .putString(PREF_USER_NAME, name)
                 .commit();
+    }
+
+    public static boolean isAnalyticsEnabled(Context context) {
+        // Default is true!
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PREF_ANALYTICS_ENABLED, true);
+    }
+
+    public static void setAnalyticsEnabled(Context context, boolean enabled) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(PREF_ANALYTICS_ENABLED, enabled)
+                .commit();
+    }
+
+    public static boolean isAnalyticsEnabledPreferenceKey(String key) {
+        return key.equals(PREF_ANALYTICS_ENABLED);
     }
 }

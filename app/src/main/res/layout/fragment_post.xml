@@ -40,8 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/padding_normal"
         android:layout_gravity="top|right"
-        android:visibility="gone"
-        style="@android:style/Widget.ProgressBar" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:orientation="vertical"

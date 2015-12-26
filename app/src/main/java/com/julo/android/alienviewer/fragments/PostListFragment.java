@@ -317,8 +317,12 @@ public class PostListFragment extends Fragment {
             Util.showView(mNsfwTextView, mPost.isNsfw());
             Util.showView(mMoreImagesTextView, Util.isImgurAlbumUrl(mPost.getUrl()));
 
+            //Util.recycleImageViewDrawable(mImageView);
+
             RequestCreator requestCreator = Picasso.with(getActivity())
-                    .load(post.getImageUrl());
+                    .load(post.getImageUrl())
+                    .fit()
+                    .centerCrop();
 
             if (mPost.isNsfw()) {
                 requestCreator.transform(new BlurTransformation(getActivity(), 25, 4));
@@ -358,6 +362,7 @@ public class PostListFragment extends Fragment {
 
         public FetchParameters setSubreddit(String name) {
             subredditName = name;
+            findRandomSubreddit = false;
             return this;
         }
 
@@ -419,8 +424,24 @@ public class PostListFragment extends Fragment {
             mFetchTaskState = FETCH_TASK_STATE_DONE;
 
             if (posts.size() == 0) {
-                Toast.makeText(getActivity(), R.string.no_image_posts, Toast.LENGTH_LONG)
+                String text;
+                if (mFetchParameters.findRandomSubreddit) {
+                    text = getResources().getString(R.string.no_image_posts_in_subreddit, mRandomSubredditName);
+                } else if (mTaskFetchParameters.subredditName != null) {
+                    text = getResources().getString(R.string.no_image_posts_in_subreddit, mTaskFetchParameters.subredditName);
+                } else {
+                    text = getResources().getString(R.string.no_image_posts);
+                }
+
+                Toast.makeText(getActivity(), text, Toast.LENGTH_LONG)
                         .show();
+            }
+
+            // If we just found a random subreddit, morph the FetchParameters to point to the
+            // subreddit that was found. This makes it so performing a refresh will refresh the found
+            // subreddit, as opposed to doing another random subreddit search.
+            if (mTaskFetchParameters.findRandomSubreddit) {
+                mTaskFetchParameters.setSubreddit(mRandomSubredditName);
             }
 
             String infoText;
