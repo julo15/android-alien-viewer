@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -150,6 +151,8 @@ public class PostListFragment extends Fragment {
         //if (mSearchQuery != null) {
             menu.findItem(R.id.menu_item_clear_search).setVisible(true);
         //}
+
+        menu.findItem(R.id.menu_item_subreddit_view).setVisible(false);
 
         if (Session.getInstance().getReddit().isLoggedIn()) {
             menu.findItem(R.id.menu_item_log_in).setVisible(false);

@@ -2,8 +2,10 @@ package com.julo.android.alienviewer.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 
 import com.julo.android.alienviewer.R;
 import com.julo.android.alienviewer.fragments.PostListFragment;
@@ -25,6 +27,16 @@ public class MainListActivity extends SingleFragmentActivity
         Intent intent = new Intent(context, MainListActivity.class);
         intent.putExtra(EXTRA_SUBREDDIT, subreddit);
         return intent;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setLogo(R.drawable.ic_redditgram);
+        actionBar.setDisplayUseLogoEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
     }
 
     @Override
