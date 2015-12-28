@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.julo.android.alienviewer"
+        applicationId "com.julo.android.redditpix"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1

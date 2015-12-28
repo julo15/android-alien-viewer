@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.julo.android.alienviewer" >
+    package="com.julo.android.redditpix" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name=".App"
+        android:name="com.julo.android.redditpix.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_redditgram_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.julo.android.alienviewer.activities.SplashActivity"
+            android:name="com.julo.android.redditpix.activities.SplashActivity"
             android:theme="@style/AppThemeSplash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.julo.android.alienviewer.activities.AuthorizeActivity">
+        <activity android:name="com.julo.android.redditpix.activities.AuthorizeActivity">
 
         </activity>
         <activity
-            android:name="com.julo.android.alienviewer.activities.MainListActivity"
+            android:name="com.julo.android.redditpix.activities.MainListActivity"
             android:logo="@drawable/ic_redditgram"
             android:label=" ">
 
         </activity>
         <activity
-            android:name="com.julo.android.alienviewer.activities.SubredditListActivity"
+            android:name="com.julo.android.redditpix.activities.SubredditListActivity"
             android:label="@string/app_name" >
 
         </activity>
-        <activity android:name="com.julo.android.alienviewer.activities.PostListActivity" />
+        <activity android:name="com.julo.android.redditpix.activities.PostListActivity" />
         <activity
-            android:name="com.julo.android.alienviewer.activities.PostPagerActivity"
+            android:name="com.julo.android.redditpix.activities.PostPagerActivity"
             android:theme="@style/AppThemeTranslucent" />
-        <activity android:name="com.julo.android.alienviewer.activities.WebViewActivity" />
+        <activity android:name="com.julo.android.redditpix.activities.WebViewActivity" />
         <activity
-            android:name="com.julo.android.alienviewer.activities.ImagePagerActivity"
+            android:name="com.julo.android.redditpix.activities.ImagePagerActivity"
             android:theme="@style/AppThemeTranslucent" />
     </application>
 
