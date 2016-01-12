@@ -7,4 +7,5 @@
     <color name="darkened_background">#a000</color>
     <color name="nsfw_red">#f55</color>
     <color name="link_text">#3366ff</color>
+    <color name="placeholder_background">#5da8db</color>
 </resources>

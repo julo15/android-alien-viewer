@@ -17,10 +17,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- layout_width and layout_height are managed in code-behind -->
+            <!-- Leaving adjustViewBounds in there gives the placeholder some size.
+                 Eventually a genuine solution should be used to give it size. -->
             <ImageView
                 android:id="@+id/post_item_image_view"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:src="@drawable/ic_reddit_circle"
                 android:scaleType="centerCrop" />
 
