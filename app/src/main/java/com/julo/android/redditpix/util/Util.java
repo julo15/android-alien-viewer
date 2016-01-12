@@ -96,15 +96,4 @@ public class Util {
         Preferences.setAccessToken(context, (tokens != null) ? tokens.getAccessToken() : null);
         Preferences.setRefreshToken(context, (tokens != null) ? tokens.getRefreshToken() : null);
     }
-
-    public static void recycleImageViewDrawable(ImageView imageView) {
-        Drawable drawable = imageView.getDrawable();
-        if (drawable instanceof BitmapDrawable) {
-            Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-            if (bitmap != null) {
-                bitmap.recycle();
-                imageView.setImageDrawable(null);
-            }
-        }
-    }
 }

@@ -1,15 +1,17 @@
 package com.julo.android.redditpix.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +41,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * Created by julianlo on 12/15/15.
@@ -53,10 +57,13 @@ public class PostListFragment extends Fragment {
     private static final int FETCH_TASK_STATE_RUNNING = 1;
     private static final int FETCH_TASK_STATE_DONE = 2;
 
+    private static final int NUM_COLUMNS = 2;
+
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView mInfoBarTextView;
     private View mInfoBarView;
+    private WeakHashMap<Post, Point> mImageSizeMap = new WeakHashMap<>();
 
     private List<Post> mPosts = new ArrayList<>();
     private FetchPostsTask mFetchPostsTask;
@@ -100,7 +107,8 @@ public class PostListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_post_list, container, false);
 
         mRecyclerView = Util.findView(view, R.id.fragment_post_list_recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL));
+        mImageSizeMap.clear();
         setupAdapter();
 
         mSwipeRefreshLayout = Util.findView(view, R.id.fragment_posts_list_swipe_refresh_layout);
@@ -246,7 +254,14 @@ public class PostListFragment extends Fragment {
     }
 
     private void setupAdapter() {
-        mRecyclerView.setAdapter(new PostAdapter(mPosts));
+        // StaggeredGridLayoutManager doesn't play well when you're constantly setting a new adapter
+        // (it leaves a bunch of dead whitespace at the top of the RecyclerView), so we always just
+        // modify the dataset of the existing adapter.
+        if (mRecyclerView.getAdapter() == null) {
+            mRecyclerView.setAdapter(new PostAdapter(mPosts));
+        } else {
+            ((PostAdapter)mRecyclerView.getAdapter()).setPosts(mPosts);
+        }
     }
 
     private void setSubredditSearch(String query, boolean isSearchQuery) {
@@ -307,8 +322,31 @@ public class PostListFragment extends Fragment {
             });
         }
 
+        private void cacheImageViewSize() {
+            // Cache the size of the image
+            Point size = new Point(mImageView.getWidth(), mImageView.getHeight());
+            if (size.x > 0 && size.y > 0) {
+                mImageSizeMap.put(mPost, size);
+            }
+        }
+
+        private void setImageViewSize() {
+            ViewGroup.LayoutParams lp = mImageView.getLayoutParams();
+            Point cachedSize = mImageSizeMap.get(mPost);
+            lp.width = (cachedSize != null) ? cachedSize.x : ViewGroup.LayoutParams.MATCH_PARENT;
+            lp.height = (cachedSize != null) ? cachedSize.y : ViewGroup.LayoutParams.WRAP_CONTENT;
+            mImageView.setLayoutParams(lp);
+        }
+
         public void bindPost(Post post) {
+            if (mPost != null) {
+                cacheImageViewSize();
+            }
+
             mPost = post;
+
+            // If we've already scrolled past this post before, use the cached size.
+            setImageViewSize();
 
             String name = getResources().getString(R.string.post_item_description,
                     mPost.getSubredditName(), mPost.getCommentCount());
@@ -319,15 +357,22 @@ public class PostListFragment extends Fragment {
             Util.showView(mNsfwTextView, mPost.isNsfw());
             Util.showView(mMoreImagesTextView, Util.isImgurAlbumUrl(mPost.getUrl()));
 
-            //Util.recycleImageViewDrawable(mImageView);
+            // Get an approximate pixel width for the image view. The width is approximately equal to
+            // the width of the screen divided by the number of columns. It is only approximate since
+            // there is margin/padding around the image. This is fine, since we are using it only to
+            // downscale the image - no big deal if the image is a bit bigger.
+            Point size = new Point();
+            ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
+            int approximateImageViewWidth = size.x / NUM_COLUMNS;
 
             RequestCreator requestCreator = Picasso.with(getActivity())
                     .load(post.getImageUrl())
-                    .fit()
-                    .centerCrop();
+                    .placeholder(R.drawable.image_placeholder)
+                    .resize(approximateImageViewWidth, 0)
+                    .onlyScaleDown();
 
             if (mPost.isNsfw()) {
-                requestCreator.transform(new BlurTransformation(getActivity(), 25, 4));
+                requestCreator.transform(new BlurTransformation(getActivity(), 25, 2));
             }
 
             requestCreator.into(mImageView);
@@ -338,7 +383,12 @@ public class PostListFragment extends Fragment {
         private List<Post> mPosts;
 
         public PostAdapter(List<Post> posts) {
+            setPosts(posts);
+        }
+
+        public void setPosts(List<Post> posts) {
             mPosts = posts;
+            notifyDataSetChanged();
         }
 
         @Override
@@ -421,6 +471,7 @@ public class PostListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Post> posts) {
             mPosts = posts;
+            mImageSizeMap.clear();
             setupAdapter();
             showProgress(false);
             mFetchTaskState = FETCH_TASK_STATE_DONE;
