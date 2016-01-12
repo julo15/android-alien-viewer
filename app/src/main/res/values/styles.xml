@@ -55,6 +55,7 @@
 
     <style name="SplashTextAppearance" parent="TextAppearance.AppCompat.Title">
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
 </resources>

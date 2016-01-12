@@ -14,7 +14,7 @@
     <string name="fetching_subs_progress">Fetching subscribed subs...</string>
     <string name="fetching_sub_posts_progress">Fetching posts (%1$s/%2$s)...</string>
     <string name="sorting_subs_progress">"Sorting subs...</string>
-    <string name="splash_text">Pics for reddit: See today\'s reddit images</string>
+    <string name="splash_text">Pics for reddit: Today\'s reddit images</string>
     <string name="show_nsfw">Show NSFW</string>
     <string name="hide_nsfw">Hide NSFW</string>
     <string name="filter_subreddit_list">Filter subreddits</string>
