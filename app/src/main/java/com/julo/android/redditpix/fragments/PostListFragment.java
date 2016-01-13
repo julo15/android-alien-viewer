@@ -25,11 +25,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.julo.android.redditpix.BlurTransformation;
+import com.julo.android.redditpix.EndlessRecyclerView;
 import com.julo.android.redditpix.Preferences;
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
 import com.julo.android.redditpix.activities.AuthorizeActivity;
 import com.julo.android.redditpix.activities.ImagePagerActivity;
+import com.julo.android.redditpix.reddit.Listing;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.reddit.Reddit;
 import com.julo.android.redditpix.util.Util;
@@ -59,7 +61,7 @@ public class PostListFragment extends Fragment {
 
     private static final int NUM_COLUMNS = 2;
 
-    private RecyclerView mRecyclerView;
+    private EndlessRecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView mInfoBarTextView;
     private View mInfoBarView;
@@ -68,7 +70,7 @@ public class PostListFragment extends Fragment {
     private List<Post> mPosts = new ArrayList<>();
     private FetchPostsTask mFetchPostsTask;
     private int mFetchTaskState = FETCH_TASK_STATE_NOT_RUN;
-    private FetchParameters mFetchParameters;
+    private FetchContext mFetchContext = new FetchContext();
     private String mSearchQuery;
 
     public static PostListFragment newInstance() {
@@ -108,6 +110,14 @@ public class PostListFragment extends Fragment {
 
         mRecyclerView = Util.findView(view, R.id.fragment_post_list_recycler_view);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL));
+        mRecyclerView.setOnMoreItemsNeededListener(new EndlessRecyclerView.OnMoreItemsNeededListener() {
+            @Override
+            public boolean onMoreItemsNeeded() {
+                fetchPosts(false /* load more */);
+                return true;
+            }
+        });
+
         mImageSizeMap.clear();
         setupAdapter();
 
@@ -116,7 +126,7 @@ public class PostListFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                fetchPosts();
+                fetchPosts(true /* refresh */);
             }
         });
 
@@ -125,8 +135,7 @@ public class PostListFragment extends Fragment {
         mInfoBarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setSubredditSearch(null, true); // clear out the search view
-                fetchPosts();
+                mRecyclerView.smoothScrollToPosition(0);
             }
         });
 
@@ -134,7 +143,7 @@ public class PostListFragment extends Fragment {
         if (Preferences.getAccessToken(getActivity()) == null) {
             startAuthorizeActivityForResult();
         } else */ if (mFetchTaskState == FETCH_TASK_STATE_NOT_RUN) {
-            fetchPosts();
+            fetchPosts(true /* refresh */);
         } else if (mFetchTaskState == FETCH_TASK_STATE_RUNNING) {
             showProgress(true);
         }
@@ -181,7 +190,7 @@ public class PostListFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 setSubredditSearch(query, true);
-                fetchPosts();
+                fetchPosts(true /* refresh */);
                 Util.hideSearchView(searchView);
                 return true;
             }
@@ -197,7 +206,7 @@ public class PostListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_refresh_list:
-                fetchPosts();
+                fetchPosts(true /* refresh */);
                 return true;
 
             case R.id.menu_item_log_in:
@@ -209,19 +218,19 @@ public class PostListFragment extends Fragment {
                 Session.getInstance().setNewTokens(null);
                 Preferences.setUserName(getActivity(), null);
                 getActivity().invalidateOptionsMenu();
-                fetchPosts();
+                fetchPosts(true /* refresh */);
                 return true;
 
             case R.id.menu_item_random_subreddit:
                 // Clear out the query, then search for a random subreddit
                 setSubredditSearch(null, true);
-                mFetchParameters = new FetchParameters().setDoRandomSubreddit(true);
-                fetchPosts();
+                mFetchContext.startNewRandomFetch();
+                fetchPosts(true /* refresh */);
                 return true;
 
             case R.id.menu_item_clear_search:
                 setSubredditSearch(null, true);
-                fetchPosts();
+                fetchPosts(true /* refresh */);
                 return true;
 
             case R.id.menu_item_subreddit_view:
@@ -241,7 +250,7 @@ public class PostListFragment extends Fragment {
 
         if (requestCode == REQUEST_AUTHORIZE) {
             getActivity().invalidateOptionsMenu();
-            fetchPosts();
+            fetchPosts(true /* refresh */);
         }
     }
 
@@ -269,15 +278,23 @@ public class PostListFragment extends Fragment {
             mSearchQuery = query;
             getActivity().invalidateOptionsMenu();
         }
-        mFetchParameters = new FetchParameters().setSubreddit(query);
+
+        if (query != null) {
+            mFetchContext.startNewSubredditFetch(query);
+        } else {
+            mFetchContext.startNewFrontPageFetch();
+        }
+
     }
 
-    private void fetchPosts() {
+    private void fetchPosts(boolean refresh) {
         if (mFetchPostsTask != null) {
             mFetchPostsTask.cancel(false);
         }
         mFetchPostsTask = new FetchPostsTask();
-        mFetchPostsTask.execute(mFetchParameters);
+        mFetchPostsTask.execute(refresh ?
+                mFetchContext.createParametersForRefresh() :
+                mFetchContext.createParametersForMore());
     }
 
     private void showProgress(final boolean show) {
@@ -411,6 +428,7 @@ public class PostListFragment extends Fragment {
     private class FetchParameters {
         public String subredditName;
         public boolean findRandomSubreddit;
+        public String after;
 
         public FetchParameters setSubreddit(String name) {
             subredditName = name;
@@ -422,9 +440,63 @@ public class PostListFragment extends Fragment {
             findRandomSubreddit = random;
             return this;
         }
+
+        public FetchParameters setAfter(String a) {
+            after = a;
+            return this;
+        }
     }
 
-    private class FetchPostsTask extends AsyncTask<FetchParameters,Void,List<Post>> {
+
+    private class FetchContext {
+        private FetchParameters mBaseParameters;
+        private String mNextAfter;
+
+        public void startNewFrontPageFetch() {
+            mBaseParameters = new FetchParameters();
+            resetContext();
+        }
+
+        public void startNewRandomFetch() {
+            mBaseParameters = new FetchParameters()
+                    .setDoRandomSubreddit(true);
+            resetContext();
+        }
+
+        public void startNewSubredditFetch(String subreddit) {
+            mBaseParameters = new FetchParameters()
+                    .setSubreddit(subreddit);
+            resetContext();
+        }
+
+        public void notifyFetchComplete(String newAfter, String randomSubredditFound) {
+            mNextAfter = newAfter;
+            if (randomSubredditFound != null) {
+                mBaseParameters.setSubreddit(randomSubredditFound);
+            }
+        }
+
+        private void resetContext() {
+            mNextAfter = null;
+        }
+
+        public FetchParameters createParametersForRefresh() {
+            FetchParameters fetchParameters = new FetchParameters();
+            fetchParameters.subredditName = mBaseParameters.subredditName;
+            fetchParameters.findRandomSubreddit = mBaseParameters.findRandomSubreddit;
+            return fetchParameters;
+        }
+
+        public FetchParameters createParametersForMore() throws IllegalStateException {
+            if (mNextAfter == null) {
+                throw new IllegalStateException("No after token available");
+            }
+            return createParametersForRefresh()
+                    .setAfter(mNextAfter);
+        }
+    }
+
+    private class FetchPostsTask extends AsyncTask<FetchParameters,Void,Listing<Post>> {
 
         private FetchParameters mTaskFetchParameters;
         private String mRandomSubredditName;
@@ -436,7 +508,7 @@ public class PostListFragment extends Fragment {
         }
 
         @Override
-        protected List<Post> doInBackground(FetchParameters... params) {
+        protected Listing<Post> doInBackground(FetchParameters... params) {
             try {
                 FetchParameters fetchParams = params[0];
                 mTaskFetchParameters = fetchParams;
@@ -445,9 +517,9 @@ public class PostListFragment extends Fragment {
                 final int numPosts = 100;
 
                 if (fetchParams.subredditName != null) {
-                    return reddit.fetchPosts(fetchParams.subredditName, numPosts, Util.IMAGE_POST_FILTERER);
+                    return reddit.fetchPosts(fetchParams.subredditName, numPosts, mTaskFetchParameters.after, Util.IMAGE_POST_FILTERER);
                 } else if (fetchParams.findRandomSubreddit) {
-                    return reddit.fetchPosts("random", numPosts, new Reddit.Filterer<Post>() {
+                    return reddit.fetchPosts("random", numPosts, mTaskFetchParameters.after, new Reddit.Filterer<Post>() {
                         @Override
                         public boolean filter(Post post) {
                             mRandomSubredditName = post.getSubredditName();
@@ -455,7 +527,7 @@ public class PostListFragment extends Fragment {
                         }
                     });
                 } else {
-                    return reddit.fetchPosts(numPosts, Util.IMAGE_POST_FILTERER);
+                    return reddit.fetchPosts(numPosts, mTaskFetchParameters.after, Util.IMAGE_POST_FILTERER);
                 }
             } catch (Reddit.AuthenticationException ae) {
                 Log.w(TAG, "Access token expired", ae);
@@ -465,20 +537,31 @@ public class PostListFragment extends Fragment {
             } catch (IOException ioe) {
                 Log.e(TAG, "Failed to load posts", ioe);
             }
-            return new ArrayList<>();
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<Post> posts) {
-            mPosts = posts;
-            mImageSizeMap.clear();
+        protected void onPostExecute(Listing<Post> postListing) {
+            if (mTaskFetchParameters.after == null) {
+                mPosts = (postListing != null) ? postListing.getItems() : new ArrayList<Post>();
+                mRecyclerView.smoothScrollToPosition(0);
+                mImageSizeMap.clear();
+            } else if (postListing != null) {
+                mPosts.addAll(postListing.getItems());
+            }
             setupAdapter();
             showProgress(false);
+            mRecyclerView.notifyDoneLoading();
             mFetchTaskState = FETCH_TASK_STATE_DONE;
 
-            if (posts.size() == 0) {
+            // If we just found a random subreddit, morph the FetchParameters to point to the
+            // subreddit that was found. This makes it so performing a refresh will refresh the found
+            // subreddit, as opposed to doing another random subreddit search.
+            mFetchContext.notifyFetchComplete((postListing != null) ? postListing.getAfter() : null, mRandomSubredditName);
+
+            if (mPosts.size() == 0) {
                 String text;
-                if (mFetchParameters.findRandomSubreddit) {
+                if (mTaskFetchParameters.findRandomSubreddit) {
                     text = getResources().getString(R.string.no_image_posts_in_subreddit, mRandomSubredditName);
                 } else if (mTaskFetchParameters.subredditName != null) {
                     text = getResources().getString(R.string.no_image_posts_in_subreddit, mTaskFetchParameters.subredditName);
@@ -488,13 +571,6 @@ public class PostListFragment extends Fragment {
 
                 Toast.makeText(getActivity(), text, Toast.LENGTH_LONG)
                         .show();
-            }
-
-            // If we just found a random subreddit, morph the FetchParameters to point to the
-            // subreddit that was found. This makes it so performing a refresh will refresh the found
-            // subreddit, as opposed to doing another random subreddit search.
-            if (mTaskFetchParameters.findRandomSubreddit) {
-                mTaskFetchParameters.setSubreddit(mRandomSubredditName);
             }
 
             String infoText;

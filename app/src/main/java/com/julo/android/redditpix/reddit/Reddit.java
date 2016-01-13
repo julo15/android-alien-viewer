@@ -228,7 +228,7 @@ public class Reddit {
                 .header("Authorization", "bearer " + mTokens.getAccessToken());
     }
 
-    public List<Subreddit> fetchSubscribedSubreddits(int limit, final Filterer<Subreddit> filterer) throws IOException, JSONException, AuthenticationException {
+    public Listing<Subreddit> fetchSubscribedSubreddits(int limit, final Filterer<Subreddit> filterer) throws IOException, JSONException, AuthenticationException {
         String url = getMySubredditsUri("subscriber")
                 .buildUpon()
                 .appendQueryParameter("limit", String.valueOf(limit))
@@ -241,7 +241,7 @@ public class Reddit {
             throw new IOException("HTTP failure response: " + response.code());
         }
 
-        List<Subreddit> subreddits = parseListingItems(response.body().string(), new ListingItemParser<Subreddit>() {
+        Listing<Subreddit> subredditListing = parseListingItems(response.body().string(), new ListingItemParser<Subreddit>() {
             @Override
             public Subreddit parseItem(JSONObject itemJsonObject) throws JSONException {
                 Log.v(TAG, "Processing subreddit JSON: " + itemJsonObject.toString());
@@ -254,7 +254,7 @@ public class Reddit {
                 }
             }
         });
-        return subreddits;
+        return subredditListing;
     }
 
     private void parseSubreddit(Subreddit subreddit, JSONObject jsonData) throws JSONException {
@@ -314,15 +314,19 @@ public class Reddit {
         return mTokens;
     }
 
-    public List<Post> fetchPosts(String subreddit) throws IOException, JSONException {
+    public Listing<Post> fetchPosts(String subreddit) throws IOException, JSONException {
         return fetchPosts(subreddit, null);
     }
 
-    public List<Post> fetchPosts(String subreddit, final Filterer<Post> filterer) throws IOException, JSONException {
+    public Listing<Post> fetchPosts(String subreddit, final Filterer<Post> filterer) throws IOException, JSONException {
         return fetchPosts(subreddit, null, filterer);
     }
 
-    public List<Post> fetchPosts(String subreddit, Integer limit, final Filterer<Post> filterer) throws IOException, JSONException {
+    public Listing<Post> fetchPosts(String subreddit, Integer limit, final Filterer<Post> filterer) throws IOException, JSONException {
+        return fetchPosts(subreddit, limit,  null,filterer);
+    }
+
+    public Listing<Post> fetchPosts(String subreddit, Integer limit, String after, final Filterer<Post> filterer) throws IOException, JSONException {
         Uri.Builder uriBuilder = ENDPOINT
                 .buildUpon()
                 .appendPath("r")
@@ -331,6 +335,10 @@ public class Reddit {
 
         if (limit != null) {
             uriBuilder.appendQueryParameter("limit", String.valueOf(limit.intValue()));
+        }
+
+        if (after != null) {
+            uriBuilder.appendQueryParameter("after", after);
         }
 
         String url = uriBuilder.build().toString();
@@ -345,7 +353,12 @@ public class Reddit {
         }
     }
 
-    public List<Post> fetchPosts(Integer limit, final Filterer<Post> filterer)
+    public Listing<Post> fetchPosts(Integer limit, final Filterer<Post> filterer)
+            throws AuthenticationException, IOException, JSONException {
+        return fetchPosts(limit, null, filterer);
+    }
+
+    public Listing<Post> fetchPosts(Integer limit, String after, final Filterer<Post> filterer)
             throws AuthenticationException, IOException, JSONException {
         boolean useOAuth = (mTokens != null);
         Uri baseUri = useOAuth ? OAUTH_ENDPOINT : ENDPOINT;
@@ -357,13 +370,17 @@ public class Reddit {
             uriBuilder.appendQueryParameter("limit", String.valueOf(limit.intValue()));
         }
 
+        if (after != null) {
+            uriBuilder.appendQueryParameter("after", after);
+        }
+
         String url = uriBuilder.build().toString();
         Request request = (useOAuth ? newAccessTokenRequestBuilder(url) : new Request.Builder().url(url))
                 .build();
         return fetchPosts(request, filterer);
     }
 
-    private List<Post> fetchPosts(Request request, final Filterer<Post> filterer)
+    private Listing<Post> fetchPosts(Request request, final Filterer<Post> filterer)
             throws AuthenticationException, JSONException, IOException {
         Response response = mHttpClient.newCall(request).execute();
         String responseBody = response.body().string();
@@ -406,9 +423,10 @@ public class Reddit {
         return post;
     }
 
-    private <T> List<T> parseListingItems(String responseBody, ListingItemParser<T> parser) throws IOException, JSONException {
-        JSONArray itemsJsonArray = new JSONObject(responseBody)
-                .getJSONObject("data")
+    private <T> Listing<T> parseListingItems(String responseBody, ListingItemParser<T> parser) throws IOException, JSONException {
+        JSONObject dataJsonObject = new JSONObject(responseBody)
+                .getJSONObject("data");
+        JSONArray itemsJsonArray = dataJsonObject
                 .getJSONArray("children");
         List<T> items = new ArrayList<>();
         for (int i = 0; i < itemsJsonArray.length(); i++) {
@@ -418,7 +436,12 @@ public class Reddit {
                 items.add(item);
             }
         }
-        return items;
+
+        Listing<T> listing = new Listing<>();
+        listing.setItems(items);
+        listing.setBefore(dataJsonObject.getString("before"));
+        listing.setAfter(dataJsonObject.getString("after"));
+        return listing;
     }
 
     private static String determinePostImageUrl(String postUrl) throws IOException, JSONException {
