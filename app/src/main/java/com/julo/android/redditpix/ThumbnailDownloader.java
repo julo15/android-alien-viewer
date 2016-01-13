@@ -75,7 +75,9 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private void handleRequest(final T target) {
         try {
             final String subreddit = mRequestMap.get(target);
-            List<Post> posts = new Reddit(null).fetchPosts(subreddit, 5, Util.IMAGE_POST_FILTERER);
+            List<Post> posts = new Reddit(null)
+                    .fetchPosts(subreddit, 5, Util.IMAGE_POST_FILTERER)
+                    .getItems();
 
             if (posts.size() > 0) {
                 final String imageUrl = posts.get(0).getImageUrl();

@@ -74,7 +74,9 @@ public class PostPagerActivity extends BaseImagePagerActivity
         @Override
         protected List<Post> doInBackground(String... params) {
             try {
-                List<Post> posts = new Reddit(null).fetchPosts(params[0], Util.IMAGE_POST_FILTERER);
+                List<Post> posts = new Reddit(null)
+                        .fetchPosts(params[0], Util.IMAGE_POST_FILTERER)
+                        .getItems();
                 return posts;
             } catch (IOException ioe) {
                 Log.e(TAG, "Failed to fetch posts", ioe);

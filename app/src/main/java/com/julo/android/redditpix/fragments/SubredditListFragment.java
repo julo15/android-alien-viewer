@@ -412,7 +412,7 @@ public class SubredditListFragment extends Fragment {
                 public boolean filter(Subreddit item) {
                     return ((query == null) || item.getName().toLowerCase().contains(query.toLowerCase()));
                 }
-            });
+            }).getItems();
 
             if (isCancelled()) {
                 return null;
@@ -436,7 +436,9 @@ public class SubredditListFragment extends Fragment {
 
                     subreddit.setTopPostUtc(0);
 
-                    List<Post> posts = new Reddit(null).fetchPosts(subreddit.getName(), 3, Util.IMAGE_POST_FILTERER);
+                    List<Post> posts = new Reddit(null)
+                            .fetchPosts(subreddit.getName(), 3, Util.IMAGE_POST_FILTERER)
+                            .getItems();
 
                     if (isCancelled()) {
                         return null;
@@ -475,7 +477,9 @@ public class SubredditListFragment extends Fragment {
             throws Reddit.AuthenticationException, JSONException, IOException {
             Reddit reddit = Session.getInstance().getReddit();
             List<String> subredditNames = new ArrayList<>();
-            List<Post> posts = reddit.fetchPosts(200, Util.IMAGE_POST_FILTERER);
+            List<Post> posts = reddit
+                    .fetchPosts(200, Util.IMAGE_POST_FILTERER)
+                    .getItems();
 
             boolean allowNsfw = Preferences.isNsfwAllowed(getActivity());
 
