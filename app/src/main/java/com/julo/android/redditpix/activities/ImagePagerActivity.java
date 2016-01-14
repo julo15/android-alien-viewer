@@ -78,7 +78,9 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         mCommentsCountTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = WebViewActivity.newIntent(ImagePagerActivity.this, Util.ensureUrlHasRedditPrefix(mPost.getCommentsUrl()));
+                Intent intent = new WebViewActivity.IntentBuilder(ImagePagerActivity.this)
+                        .url(Util.ensureUrlHasRedditPrefix(mPost.getCommentsUrl()))
+                        .build();
                 startActivity(intent);
             }
         });
@@ -113,7 +115,10 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         mLinkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = WebViewActivity.newIntent(ImagePagerActivity.this, mPost.getUrl());
+                Intent intent = new WebViewActivity.IntentBuilder(ImagePagerActivity.this)
+                        .url(mPost.getUrl())
+                        .showAddress(true)
+                        .build();
                 startActivity(intent);
             }
         });
