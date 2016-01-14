@@ -48,6 +48,8 @@ public class AuthorizeFragment extends BaseWebViewFragment {
             public void onPageFinished(WebView view, String url) {
                 Log.i(TAG, "Page finished loading: " + url);
 
+                super.onPageFinished(view, url);
+
                 if (url.startsWith(Reddit.REDIRECT_URI)) {
                     view.setVisibility(View.GONE);
                     Uri uri = Uri.parse(url);

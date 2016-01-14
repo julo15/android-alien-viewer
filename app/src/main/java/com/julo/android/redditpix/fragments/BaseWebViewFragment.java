@@ -1,8 +1,10 @@
 package com.julo.android.redditpix.fragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.util.Util;
@@ -18,29 +21,49 @@ import com.julo.android.redditpix.util.Util;
  * Created by julianlo on 12/13/15.
  */
 public class BaseWebViewFragment extends Fragment {
+    private static final String TAG = BaseWebViewFragment.class.getSimpleName();
 
     private static final String ARG_URL = "url";
 
     protected WebView mWebView;
     private ProgressBar mProgressBar;
+    private Callbacks mCallbacks;
 
-    protected static class BaseWebViewClient extends WebViewClient {
+    public interface Callbacks {
+        void onPageLoading(String url);
+    }
+
+    protected class BaseWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             return false;
         }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            Log.v(TAG, "Started: " + url);
+            if (mCallbacks != null) {
+                mCallbacks.onPageLoading(url);
+            }
+        }
     }
 
-    public static BaseWebViewFragment newInstance(String url) {
-        BaseWebViewFragment fragment = new BaseWebViewFragment();
-        fragment.setArguments(newBaseWebViewFragmentArguments(url));
-        return fragment;
-    }
+    public static class Builder {
+        private String mUrl;
+        private boolean mShowAddress;
 
-    protected static Bundle newBaseWebViewFragmentArguments(String url) {
-        Bundle args = new Bundle();
-        args.putString(ARG_URL, url);
-        return args;
+        public Builder url(String url) {
+            mUrl = url;
+            return this;
+        }
+
+        public BaseWebViewFragment build() {
+            BaseWebViewFragment fragment = new BaseWebViewFragment();
+            Bundle args = new Bundle();
+            args.putString(ARG_URL, mUrl);
+            fragment.setArguments(args);
+            return fragment;
+        }
     }
 
     @Nullable
@@ -96,5 +119,9 @@ public class BaseWebViewFragment extends Fragment {
         } else {
             return false;
         }
+    }
+
+    public void setCallbacks(Callbacks callbacks) {
+        mCallbacks = callbacks;
     }
 }
