@@ -58,4 +58,9 @@
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
+    <style name="VoteButtons">
+        <item name="emphasizedTextColor">@color/colorAccent</item>
+        <item name="transitionTextColor">@color/transition_vote</item>
+    </style>
+
 </resources>

@@ -333,6 +333,7 @@ public class PostListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // TODO: Start the activity for result, and receive the post and put it in the list.
                     Intent intent = ImagePagerActivity.newIntent(getActivity(), mPost, mPost.getImageUrl());
                     ImagePagerActivity.startWithTransition(getActivity(), intent, mImageView);
                 }

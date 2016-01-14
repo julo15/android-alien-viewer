@@ -63,6 +63,12 @@ public class Reddit {
             .appendPath("mine")
             .build();
 
+    private static final String TYPE_PREFIX_LINK = "t3_";
+
+    public static final int VOTE_UP = 1;
+    public static final int VOTE_DOWN = -1;
+    public static final int VOTE_UNVOTE = 0;
+
     public interface Filterer<T> {
         boolean filter(T item);
     }
@@ -407,6 +413,7 @@ public class Reddit {
 
     public static Post parsePost(JSONObject itemJsonObject) throws IOException, JSONException {
         Post post = new Post();
+        post.setId(itemJsonObject.getString("id"));
         post.setTitle(itemJsonObject.getString("title"));
         post.setUrl(itemJsonObject.getString("url"));
         post.setCommentsUrl(itemJsonObject.getString("permalink"));
@@ -415,6 +422,7 @@ public class Reddit {
         post.setKarmaCount(itemJsonObject.getInt("score"));
         post.setIsNsfw(itemJsonObject.getBoolean("over_18"));
         post.setCreatedUtc(itemJsonObject.getInt("created_utc"));
+        post.setIsLiked(Util.getBigBooleanFromJsonObject(itemJsonObject, "likes"));
         try {
             post.setImageUrl(determinePostImageUrl(post.getUrl()));
         } catch (Exception e) {
@@ -460,5 +468,26 @@ public class Reddit {
         }
 
         return null;
+    }
+
+    public void vote(String postId, int direction) throws IOException {
+        String url = OAUTH_ENDPOINT
+                .buildUpon()
+                .appendPath("api")
+                .appendPath("vote")
+                .build()
+                .toString();
+        RequestBody body = new FormEncodingBuilder()
+                .add("id", TYPE_PREFIX_LINK + postId)
+                .add("dir", String.valueOf(direction))
+                .build();
+        Request request = newAccessTokenRequestBuilder(url)
+                .post(body)
+                .build();
+        Response response = mHttpClient.newCall(request).execute();
+
+        if (response.code() != HttpURLConnection.HTTP_OK) {
+            throw new IOException("HTTP failure response: " + response.code());
+        }
     }
 }

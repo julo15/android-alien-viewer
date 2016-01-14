@@ -7,6 +7,7 @@ import android.os.Parcelable;
  * Created by julianlo on 12/12/15.
  */
 public class Post implements Parcelable {
+    private String mId;
     private String mTitle;
     private String mUrl;
     private String mImageUrl;
@@ -16,6 +17,7 @@ public class Post implements Parcelable {
     private int mKarmaCount;
     private boolean mIsNsfw;
     private int mCreatedUtc;
+    private Boolean mIsLiked; // true == upvoted, false == downvoted, null == no vote
 
     public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
         @Override
@@ -32,6 +34,7 @@ public class Post implements Parcelable {
     public Post() {}
 
     private Post(Parcel in) {
+        mId = in.readString();
         mTitle = in.readString();
         mUrl = in.readString();
         mImageUrl = in.readString();
@@ -43,6 +46,7 @@ public class Post implements Parcelable {
         in.readBooleanArray(boolArray);
         mIsNsfw = boolArray[0];
         mCreatedUtc = in.readInt();
+        mIsLiked = (Boolean)in.readSerializable();
     }
 
     @Override
@@ -52,6 +56,7 @@ public class Post implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
         dest.writeString(mTitle);
         dest.writeString(mUrl);
         dest.writeString(mImageUrl);
@@ -61,6 +66,15 @@ public class Post implements Parcelable {
         dest.writeInt(mKarmaCount);
         dest.writeBooleanArray(new boolean[]{mIsNsfw});
         dest.writeInt(mCreatedUtc);
+        dest.writeSerializable(mIsLiked);
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public String getTitle() {
@@ -133,5 +147,13 @@ public class Post implements Parcelable {
 
     public void setCreatedUtc(int createdUtc) {
         mCreatedUtc = createdUtc;
+    }
+
+    public Boolean isLiked() {
+        return mIsLiked;
+    }
+
+    public void setIsLiked(Boolean isLiked) {
+        mIsLiked = isLiked;
     }
 }

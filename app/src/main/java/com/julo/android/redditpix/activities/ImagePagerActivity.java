@@ -12,10 +12,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.julo.android.redditpix.R;
+import com.julo.android.redditpix.Session;
+import com.julo.android.redditpix.ToggleTextView;
 import com.julo.android.redditpix.fragments.ImageFragment;
 import com.julo.android.redditpix.imgur.Album;
 import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
+import com.julo.android.redditpix.reddit.Reddit;
 import com.julo.android.redditpix.util.Util;
 
 import org.json.JSONException;
@@ -38,7 +41,9 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     private TextView mTitleTextView;
     private TextView mSubredditTextView;
     private TextView mFreshnessTextView;
-    private TextView mKarmaTextView;
+    private ToggleTextView mKarmaTextView;
+    private ToggleTextView mUpVoteButton;
+    private ToggleTextView mDownVoteButton;
     private View mLinkButton;
 
     public static Intent newIntent(Context context, Post post, String imageUrl) {
@@ -103,13 +108,38 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
 
         mKarmaTextView = Util.findView(this, R.id.activity_image_pager_karma_text_view);
         mKarmaTextView.setText(String.valueOf(mPost.getKarmaCount()));
-        findViewById(R.id.activity_image_pager_karma_view).setOnClickListener(new View.OnClickListener() {
+
+        View.OnClickListener toggleTextViewClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ImagePagerActivity.this, R.string.voting_not_supported_toast, Toast.LENGTH_SHORT)
-                        .show();
+                // Set the clicked toggle text view to the transition colour.
+                // VoteTask will be responsible for setting it back to normal or emphasized.
+                ToggleTextView toggleTextView = Util.cast(v);
+                toggleTextView.setToggleState(ToggleTextView.ToggleState.TRANSITION);
+
+                boolean upClicked = (toggleTextView == mUpVoteButton);
+                boolean unVote = (mPost.isLiked() != null) && (upClicked == mPost.isLiked());
+                int vote;
+                if (unVote) {
+                    vote = Reddit.VOTE_UNVOTE;
+                } else if (upClicked) {
+                    vote = Reddit.VOTE_UP;
+                } else {
+                    vote = Reddit.VOTE_DOWN;
+                }
+
+                // TODO: Handle a task instance
+                new VoteTask().execute(vote);
             }
-        });
+        };
+
+        mUpVoteButton = Util.findView(this, R.id.activity_image_pager_up_vote_button);
+        mUpVoteButton.setOnClickListener(toggleTextViewClickListener);
+
+        mDownVoteButton = Util.findView(this, R.id.activity_image_pager_down_vote_button);
+        mDownVoteButton.setOnClickListener(toggleTextViewClickListener);
+
+        updateVoteButtonToggleStates();
 
         mLinkButton = Util.findView(this, R.id.activity_image_pager_link_button);
         mLinkButton.setOnClickListener(new View.OnClickListener() {
@@ -149,6 +179,20 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         }
     }
 
+    private void updateVoteButtonToggleStates() {
+        Boolean isLiked = mPost.isLiked();
+        if (isLiked != null && isLiked) {
+            mUpVoteButton.setToggleState(ToggleTextView.ToggleState.EMPHASIZED);
+            mKarmaTextView.setToggleState(ToggleTextView.ToggleState.EMPHASIZED);
+        } else {
+            mUpVoteButton.setToggleState(ToggleTextView.ToggleState.NORMAL);
+            mKarmaTextView.setToggleState(ToggleTextView.ToggleState.NORMAL);
+        }
+
+        mDownVoteButton.setToggleState((isLiked != null && !isLiked) ?
+                ToggleTextView.ToggleState.EMPHASIZED : ToggleTextView.ToggleState.NORMAL);
+    }
+
     private class FetchImageUrlsTask extends AsyncTask<String,Void,List<String>> {
         @Override
         protected List<String> doInBackground(String... params) {
@@ -168,6 +212,40 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
             mImageUrls = strings;
             mViewPager.getAdapter().notifyDataSetChanged();
             showTransitionImage(false);
+        }
+    }
+
+    private class VoteTask extends AsyncTask<Integer,Void,Integer> {
+        private Exception mException;
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+
+            try {
+                Session.getInstance().getReddit().vote(mPost.getId(), params[0]);
+                return params[0];
+            } catch (IOException ioe) {
+                Log.e(TAG, "Failed to vote", ioe);
+                mException = ioe;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer vote) {
+            if (mException != null) {
+                Toast.makeText(ImagePagerActivity.this, R.string.failed_to_send_vote, Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                mPost.setIsLiked(Util.convertVoteToLike(vote));
+            }
+            updateVoteButtonToggleStates();
+        }
+
+        @Override
+        protected void onCancelled() {
+            updateVoteButtonToggleStates();
         }
     }
 }
