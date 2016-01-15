@@ -43,6 +43,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.WeakHashMap;
 
 /**
@@ -54,6 +55,7 @@ public class PostListFragment extends Fragment {
     private static final String ARG_SUBREDDIT = "subreddit";
 
     private static final int REQUEST_AUTHORIZE = 1;
+    public static final int REQUEST_SHOW_POST = 2;
 
     private static final int FETCH_TASK_STATE_NOT_RUN = 0;
     private static final int FETCH_TASK_STATE_RUNNING = 1;
@@ -251,6 +253,19 @@ public class PostListFragment extends Fragment {
         if (requestCode == REQUEST_AUTHORIZE) {
             getActivity().invalidateOptionsMenu();
             fetchPosts(true /* refresh */);
+        } else if (requestCode == REQUEST_SHOW_POST) {
+            Log.v(TAG, "Got an updated post back");
+            Post updatedPost = Util.cast(data.getParcelableExtra(ImagePagerActivity.EXTRA_POST));
+            for (ListIterator<Post> iterator = mPosts.listIterator(); iterator.hasNext();) {
+                int index = iterator.nextIndex();
+                Post post = iterator.next();
+                if (post.getId().equals(updatedPost.getId())) {
+                    iterator.remove();
+                    iterator.add(updatedPost);
+                    mRecyclerView.getAdapter().notifyItemChanged(index);
+                    break;
+                }
+            }
         }
     }
 
@@ -335,7 +350,7 @@ public class PostListFragment extends Fragment {
                 public void onClick(View v) {
                     // TODO: Start the activity for result, and receive the post and put it in the list.
                     Intent intent = ImagePagerActivity.newIntent(getActivity(), mPost, mPost.getImageUrl());
-                    ImagePagerActivity.startWithTransition(getActivity(), intent, mImageView);
+                    ImagePagerActivity.startWithTransitionForResult(getActivity(), intent, mImageView, REQUEST_SHOW_POST);
                 }
             });
         }
@@ -357,14 +372,13 @@ public class PostListFragment extends Fragment {
         }
 
         public void bindPost(Post post) {
+            String previousImageUrl = null;
             if (mPost != null) {
                 cacheImageViewSize();
+                previousImageUrl = mPost.getImageUrl();
             }
 
             mPost = post;
-
-            // If we've already scrolled past this post before, use the cached size.
-            setImageViewSize();
 
             String name = getResources().getString(R.string.post_item_description,
                     mPost.getSubredditName(), mPost.getCommentCount());
@@ -375,25 +389,31 @@ public class PostListFragment extends Fragment {
             Util.showView(mNsfwTextView, mPost.isNsfw());
             Util.showView(mMoreImagesTextView, Util.isImgurAlbumUrl(mPost.getUrl()));
 
-            // Get an approximate pixel width for the image view. The width is approximately equal to
-            // the width of the screen divided by the number of columns. It is only approximate since
-            // there is margin/padding around the image. This is fine, since we are using it only to
-            // downscale the image - no big deal if the image is a bit bigger.
-            Point size = new Point();
-            ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
-            int approximateImageViewWidth = size.x / NUM_COLUMNS;
+            // Don't bother reloading the image if it's the same one.
+            if (!mPost.getImageUrl().equals(previousImageUrl)) {
+                // If we've already scrolled past this post before, use the cached size.
+                setImageViewSize();
 
-            RequestCreator requestCreator = Picasso.with(getActivity())
-                    .load(post.getImageUrl())
-                    .placeholder(R.drawable.image_placeholder)
-                    .resize(approximateImageViewWidth, 0)
-                    .onlyScaleDown();
+                // Get an approximate pixel width for the image view. The width is approximately equal to
+                // the width of the screen divided by the number of columns. It is only approximate since
+                // there is margin/padding around the image. This is fine, since we are using it only to
+                // downscale the image - no big deal if the image is a bit bigger.
+                Point size = new Point();
+                ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
+                int approximateImageViewWidth = size.x / NUM_COLUMNS;
 
-            if (mPost.isNsfw()) {
-                requestCreator.transform(new BlurTransformation(getActivity(), 25, 2));
+                RequestCreator requestCreator = Picasso.with(getActivity())
+                        .load(post.getImageUrl())
+                        .placeholder(R.drawable.image_placeholder)
+                        .resize(approximateImageViewWidth, 0)
+                        .onlyScaleDown();
+
+                if (mPost.isNsfw()) {
+                    requestCreator.transform(new BlurTransformation(getActivity(), 25, 2));
+                }
+
+                requestCreator.into(mImageView);
             }
-
-            requestCreator.into(mImageView);
         }
     }
 

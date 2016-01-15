@@ -470,7 +470,11 @@ public class Reddit {
         return null;
     }
 
-    public void vote(String postId, int direction) throws IOException {
+    public void vote(String postId, int direction) throws IOException, AuthenticationException {
+        if (mTokens == null) {
+            throw new AuthenticationException();
+        }
+
         String url = OAUTH_ENDPOINT
                 .buildUpon()
                 .appendPath("api")

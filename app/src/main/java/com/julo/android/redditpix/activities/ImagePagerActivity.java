@@ -33,7 +33,7 @@ import java.util.List;
 public class ImagePagerActivity extends BaseImagePagerActivity {
     private static final String TAG = "ImagePagerActivity";
 
-    public static final String EXTRA_POST = "com.julo.android.redditpix.post";
+    public static final String EXTRA_POST = "com.julo.android.redditpix.post"; // used for input and results
 
     private Post mPost;
     private List<String> mImageUrls = new ArrayList<>();
@@ -216,17 +216,28 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     }
 
     private class VoteTask extends AsyncTask<Integer,Void,Integer> {
+        private String mId;
         private Exception mException;
+
+        @Override
+        protected void onPreExecute() {
+            // Just to be safe, let's keep it so mPost is only accessed on the main thread
+            mId = mPost.getId();
+        }
 
         @Override
         protected Integer doInBackground(Integer... params) {
 
             try {
-                Session.getInstance().getReddit().vote(mPost.getId(), params[0]);
+                Session.getInstance().getReddit().vote(mId, params[0]);
                 return params[0];
             } catch (IOException ioe) {
                 Log.e(TAG, "Failed to vote", ioe);
                 mException = ioe;
+            } catch (Reddit.AuthenticationException ae) {
+                Log.v(TAG, "Failed to authenticate when trying to vote", ae);
+                mException = ae;
+                startActivity(AuthorizeActivity.newIntent(ImagePagerActivity.this));
             }
 
             return null;
@@ -235,10 +246,15 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         @Override
         protected void onPostExecute(Integer vote) {
             if (mException != null) {
-                Toast.makeText(ImagePagerActivity.this, R.string.failed_to_send_vote, Toast.LENGTH_SHORT)
-                        .show();
+                if (!(mException instanceof Reddit.AuthenticationException)) {
+                    Toast.makeText(ImagePagerActivity.this, R.string.failed_to_send_vote, Toast.LENGTH_SHORT)
+                            .show();
+                }
             } else {
                 mPost.setIsLiked(Util.convertVoteToLike(vote));
+                Intent data = new Intent();
+                data.putExtra(EXTRA_POST, mPost);
+                setResult(RESULT_OK, data);
             }
             updateVoteButtonToggleStates();
         }
