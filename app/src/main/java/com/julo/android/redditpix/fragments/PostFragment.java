@@ -14,6 +14,9 @@ import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.util.Util;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by julianlo on 12/12/15.
  */
@@ -23,10 +26,10 @@ public class PostFragment extends ImageFragment {
     private static final String ARG_POST_INDEX = "post_index";
 
     private Post mPost;
-    private TextView mTitleTextView;
-    private TextView mUrlTextView;
-    private TextView mMoreTextView;
-    private View mOpenButton;
+    @Bind(R.id.fragment_post_image_title_text_view) TextView mTitleTextView;
+    @Bind(R.id.fragment_post_image_url_text_view) TextView mUrlTextView;
+    @Bind(R.id.fragment_post_image_more_text_view) TextView mMoreTextView;
+    @Bind(R.id.fragment_post_image_open_button) View mOpenButton;
 
     public static PostFragment newInstance(int postIndex) {
         Bundle args = new Bundle();
@@ -71,17 +74,14 @@ public class PostFragment extends ImageFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
+        ButterKnife.bind(this, view);
 
-        mTitleTextView = Util.findView(view, R.id.fragment_post_image_title_text_view);
         mTitleTextView.setText(mPost.getTitle());
 
-        mUrlTextView = Util.findView(view, R.id.fragment_post_image_url_text_view);
         mUrlTextView.setText(mPost.getUrl());
 
-        mMoreTextView = Util.findView(view, R.id.fragment_post_image_more_text_view);
         mMoreTextView.setVisibility((Imgur.extractAlbumIdFromUrl(mPost.getUrl()) != null) ? View.VISIBLE : View.GONE);
 
-        mOpenButton = Util.findView(view, R.id.fragment_post_image_open_button);
         mOpenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
