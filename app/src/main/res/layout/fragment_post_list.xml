@@ -32,7 +32,7 @@
         </RelativeLayout>
 
         <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/fragment_posts_list_swipe_refresh_layout"
+            android:id="@+id/fragment_post_list_swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
