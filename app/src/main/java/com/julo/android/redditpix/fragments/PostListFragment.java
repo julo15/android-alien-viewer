@@ -45,6 +45,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by julianlo on 12/15/15.
  */
@@ -61,10 +64,10 @@ public class PostListFragment extends Fragment {
 
     private static final int NUM_COLUMNS = 2;
 
-    private EndlessRecyclerView mRecyclerView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private TextView mInfoBarTextView;
-    private View mInfoBarView;
+    @Bind(R.id.fragment_post_list_recycler_view) EndlessRecyclerView mRecyclerView;
+    @Bind(R.id.fragment_post_list_swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @Bind(R.id.info_bar_view_text_view) TextView mInfoBarTextView;
+    @Bind(R.id.info_bar_view) View mInfoBarView;
     private WeakHashMap<Post, Point> mImageSizeMap = new WeakHashMap<>();
 
     private List<Post> mPosts = new ArrayList<>();
@@ -107,8 +110,8 @@ public class PostListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_post_list, container, false);
+        ButterKnife.bind(this, view);
 
-        mRecyclerView = Util.findView(view, R.id.fragment_post_list_recycler_view);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL));
         mRecyclerView.setOnMoreItemsNeededListener(new EndlessRecyclerView.OnMoreItemsNeededListener() {
             @Override
@@ -121,7 +124,6 @@ public class PostListFragment extends Fragment {
         mImageSizeMap.clear();
         setupAdapter();
 
-        mSwipeRefreshLayout = Util.findView(view, R.id.fragment_posts_list_swipe_refresh_layout);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryLight, R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -130,8 +132,6 @@ public class PostListFragment extends Fragment {
             }
         });
 
-        mInfoBarTextView = Util.findView(view, R.id.info_bar_view_text_view);
-        mInfoBarView = Util.findView(view, R.id.info_bar_view);
         mInfoBarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
