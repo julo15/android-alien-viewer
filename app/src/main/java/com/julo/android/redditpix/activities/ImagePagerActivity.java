@@ -45,6 +45,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     private ToggleTextView mUpVoteButton;
     private ToggleTextView mDownVoteButton;
     private View mLinkButton;
+    private VoteTask mVoteTask;
 
     public static Intent newIntent(Context context, Post post, String imageUrl) {
         Intent intent = new Intent(context, ImagePagerActivity.class);
@@ -128,8 +129,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
                     vote = Reddit.VOTE_DOWN;
                 }
 
-                // TODO: Handle a task instance
-                new VoteTask().execute(vote);
+                sendVote(vote);
             }
         };
 
@@ -172,6 +172,14 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVoteTask != null) {
+            mVoteTask.cancel(false);
+        }
+    }
+
+    @Override
     protected void onTransitionComplete() {
         String albumId = Imgur.extractAlbumIdFromUrl(mPost.getUrl());
         if (albumId != null) {
@@ -191,6 +199,14 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
 
         mDownVoteButton.setToggleState((isLiked != null && !isLiked) ?
                 ToggleTextView.ToggleState.EMPHASIZED : ToggleTextView.ToggleState.NORMAL);
+    }
+
+    private void sendVote(int vote) {
+        if (mVoteTask != null) {
+            mVoteTask.cancel(false);
+        }
+        mVoteTask = new VoteTask();
+        mVoteTask.execute(vote);
     }
 
     private class FetchImageUrlsTask extends AsyncTask<String,Void,List<String>> {

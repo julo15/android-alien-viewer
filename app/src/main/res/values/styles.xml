@@ -61,6 +61,8 @@
     <style name="VoteButtons">
         <item name="emphasizedTextColor">@color/colorAccent</item>
         <item name="transitionTextColor">@color/transition_vote</item>
+        <item name="android:padding">@dimen/spacing_small</item>
+
     </style>
 
 </resources>
