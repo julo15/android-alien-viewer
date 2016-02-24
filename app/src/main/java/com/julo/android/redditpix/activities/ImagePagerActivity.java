@@ -19,6 +19,7 @@ import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.util.Util;
 
 import org.json.JSONException;
+import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     public static Intent newIntent(Context context, Post post, String imageUrl) {
         Intent intent = new Intent(context, ImagePagerActivity.class);
         BaseImagePagerActivity.putBaseExtras(intent, imageUrl);
-        intent.putExtra(EXTRA_POST, post);
+        intent.putExtra(EXTRA_POST, Parcels.wrap(post));
         return intent;
     }
 
@@ -71,7 +72,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPost = Util.cast(getIntent().getParcelableExtra(EXTRA_POST));
+        mPost = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_POST));
 
         mCommentsCountTextView = Util.findView(this, R.id.activity_image_pager_comments_count_text_view);
         mCommentsCountTextView.setText(getResources().getString(R.string.comments_format_link, mPost.getCommentCount()));
