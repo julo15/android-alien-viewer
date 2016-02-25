@@ -1,73 +1,28 @@
 package com.julo.android.redditpix.reddit;
 
-import android.os.Parcel;
 import android.os.Parcelable;
+
+import org.parceler.Parcel;
 
 /**
  * Created by julianlo on 12/12/15.
  */
-public class Post implements Parcelable {
-    private String mId;
-    private String mTitle;
-    private String mUrl;
-    private String mImageUrl;
-    private String mCommentsUrl;
-    private String mSubredditName;
-    private int mCommentCount;
-    private int mKarmaCount;
-    private boolean mIsNsfw;
-    private int mCreatedUtc;
-    private Boolean mIsLiked; // true == upvoted, false == downvoted, null == no vote
+@Parcel
+public class Post {
+    String mId;
+    String mTitle;
+    String mUrl;
+    String mImageUrl;
+    String mCommentsUrl;
+    String mSubredditName;
+    int mCommentCount;
+    int mKarmaCount;
+    boolean mIsNsfw;
+    int mCreatedUtc;
+    Boolean mIsLiked; // true == upvoted, false == downvoted, null == no vote
 
-    public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
-        @Override
-        public Post createFromParcel(Parcel source) {
-            return new Post(source);
-        }
-
-        @Override
-        public Post[] newArray(int size) {
-            return new Post[size];
-        }
-    };
-
+    // Empty constructor needed for Parceler library
     public Post() {}
-
-    private Post(Parcel in) {
-        mId = in.readString();
-        mTitle = in.readString();
-        mUrl = in.readString();
-        mImageUrl = in.readString();
-        mCommentsUrl = in.readString();
-        mSubredditName = in.readString();
-        mCommentCount = in.readInt();
-        mKarmaCount = in.readInt();
-        boolean[] boolArray = new boolean[1];
-        in.readBooleanArray(boolArray);
-        mIsNsfw = boolArray[0];
-        mCreatedUtc = in.readInt();
-        mIsLiked = (Boolean)in.readSerializable();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeString(mTitle);
-        dest.writeString(mUrl);
-        dest.writeString(mImageUrl);
-        dest.writeString(mCommentsUrl);
-        dest.writeString(mSubredditName);
-        dest.writeInt(mCommentCount);
-        dest.writeInt(mKarmaCount);
-        dest.writeBooleanArray(new boolean[]{mIsNsfw});
-        dest.writeInt(mCreatedUtc);
-        dest.writeSerializable(mIsLiked);
-    }
 
     public String getId() {
         return mId;
