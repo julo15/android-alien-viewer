@@ -9,6 +9,7 @@ import org.parceler.Parcel;
  */
 @Parcel
 public class Post {
+    String mId;
     String mTitle;
     String mUrl;
     String mImageUrl;
@@ -18,9 +19,18 @@ public class Post {
     int mKarmaCount;
     boolean mIsNsfw;
     int mCreatedUtc;
+    Boolean mIsLiked; // true == upvoted, false == downvoted, null == no vote
 
     // Empty constructor needed for Parceler library
     public Post() {}
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
+    }
 
     public String getTitle() {
         return mTitle;
@@ -92,5 +102,13 @@ public class Post {
 
     public void setCreatedUtc(int createdUtc) {
         mCreatedUtc = createdUtc;
+    }
+
+    public Boolean isLiked() {
+        return mIsLiked;
+    }
+
+    public void setIsLiked(Boolean isLiked) {
+        mIsLiked = isLiked;
     }
 }

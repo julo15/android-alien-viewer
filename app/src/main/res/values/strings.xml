@@ -25,7 +25,6 @@
     <string name="subreddit_format">r/%1$s</string>
     <string name="comments_format_link"><u>%1$d comments</u></string>
     <string name="nsfw">NSFW</string>
-    <string name="voting_not_supported_toast">Up/down voting not supported yet :(</string>
     <string name="random_subreddit">Random sub!</string>
     <string name="subreddit_search_hint">Type subreddit name...</string>
     <string name="clear_search">Clear subreddit filter</string>
@@ -34,4 +33,5 @@
     <string name="front_page_with_name">%1$s\'s Front Page</string>
     <string name="copy_link">Copy link</string>
     <string name="link_copied">Link copied to clipboard!</string>
+    <string name="failed_to_send_vote">We had a problem sending your vote :(. Try logging out, logging back in, and trying again.</string>
 </resources>
