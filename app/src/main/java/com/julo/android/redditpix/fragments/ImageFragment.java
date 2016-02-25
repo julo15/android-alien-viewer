@@ -15,14 +15,17 @@ import com.julo.android.redditpix.util.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by julianlo on 12/15/15.
  */
 public abstract class ImageFragment extends Fragment {
     private static final String TAG = "ImageFragment";
 
-    protected ImageView mImageView;
-    private View mProgressView;
+    @Bind(R.id.fragment_image_image_view) /*protected*/ ImageView mImageView;
+    @Bind(R.id.fragment_image_progress_bar) View mProgressView;
 
     @LayoutRes
     protected int getLayoutResId() {
@@ -44,12 +47,9 @@ public abstract class ImageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String imageUrl = getImageUrl();
-
         View view = inflater.inflate(getLayoutResId(), container, false);
+        ButterKnife.bind(this, view);
 
-        mProgressView = Util.findView(view, getProgressViewResId());
-
-        mImageView = Util.findView(view, getImageViewResId());
         if (imageUrl != null) {
             mProgressView.setVisibility(View.VISIBLE);
             Picasso.with(getActivity())

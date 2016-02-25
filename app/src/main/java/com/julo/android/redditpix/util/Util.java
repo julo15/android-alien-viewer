@@ -15,6 +15,9 @@ import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.reddit.Reddit;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by julianlo on 12/11/15.
  */
@@ -95,5 +98,32 @@ public class Util {
     public static void setRedditTokensToPreferences(Context context, Reddit.Tokens tokens) {
         Preferences.setAccessToken(context, (tokens != null) ? tokens.getAccessToken() : null);
         Preferences.setRefreshToken(context, (tokens != null) ? tokens.getRefreshToken() : null);
+    }
+
+    public static Boolean getBigBooleanFromJsonObject(JSONObject object, String field) throws JSONException {
+        if (object.has(field) && object.isNull(field)) {
+            return null;
+        }
+        return object.getBoolean(field);
+    }
+
+    public static int convertLikeToVote(Boolean isLiked) {
+        if (isLiked == null) {
+            return Reddit.VOTE_UNVOTE;
+        }
+        return (isLiked.booleanValue() ? Reddit.VOTE_UP : Reddit.VOTE_DOWN);
+    }
+
+    public static Boolean convertVoteToLike(int vote) {
+        switch (vote) {
+            case Reddit.VOTE_UP:
+                return Boolean.TRUE;
+            case Reddit.VOTE_DOWN:
+                return Boolean.FALSE;
+            case Reddit.VOTE_UNVOTE:
+                return null;
+            default:
+                throw new IllegalArgumentException("Expected one of Reddit.VOTE_UP, Reddit.VOTE_DOWN, or Reddit.VOTE_UNVOTE");
+        }
     }
 }

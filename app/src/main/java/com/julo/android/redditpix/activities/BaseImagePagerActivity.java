@@ -39,6 +39,12 @@ public class BaseImagePagerActivity extends AppCompatActivity {
         activity.startActivity(intent, options.toBundle());
     }
 
+    public static void startWithTransitionForResult(Activity activity, Intent intent, View sourceView, int requestCode) {
+        ViewCompat.setTransitionName(sourceView, "image");
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sourceView, "image");
+        activity.startActivityForResult(intent, requestCode, options.toBundle());
+    }
+
     @LayoutRes
     protected int getLayoutResId() {
         return R.layout.activity_base_image_pager;

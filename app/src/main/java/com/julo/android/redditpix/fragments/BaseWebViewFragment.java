@@ -50,7 +50,6 @@ public class BaseWebViewFragment extends Fragment {
 
     public static class Builder {
         private String mUrl;
-        private boolean mShowAddress;
 
         public Builder url(String url) {
             mUrl = url;

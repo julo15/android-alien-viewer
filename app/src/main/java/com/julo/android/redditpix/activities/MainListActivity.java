@@ -40,6 +40,20 @@ public class MainListActivity extends SingleFragmentActivity
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // The request to open an image is done with Activity.startActivityForResult, so we do not get the benefit
+        // of the result being automatically forwarded by FragmentActivity to the PostListFragment.
+        // (We use Activity.startActivityForResult because it supports transitions, and there is no Fragment
+        // equivalent of startActivityForResult that supports transitions.)
+        // So we manually forward the request to the fragment here.
+        if (requestCode == PostListFragment.REQUEST_SHOW_POST) {
+            getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
     protected Fragment createFragment() {
         // This only gets called on initial create since all the fragments we use here are retained.
         if (getIntent().getStringExtra(EXTRA_SUBREDDIT) != null) {

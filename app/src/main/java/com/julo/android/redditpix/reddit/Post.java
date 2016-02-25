@@ -1,66 +1,35 @@
 package com.julo.android.redditpix.reddit;
 
-import android.os.Parcel;
 import android.os.Parcelable;
+
+import org.parceler.Parcel;
 
 /**
  * Created by julianlo on 12/12/15.
  */
-public class Post implements Parcelable {
-    private String mTitle;
-    private String mUrl;
-    private String mImageUrl;
-    private String mCommentsUrl;
-    private String mSubredditName;
-    private int mCommentCount;
-    private int mKarmaCount;
-    private boolean mIsNsfw;
-    private int mCreatedUtc;
+@Parcel
+public class Post {
+    String mId;
+    String mTitle;
+    String mUrl;
+    String mImageUrl;
+    String mCommentsUrl;
+    String mSubredditName;
+    int mCommentCount;
+    int mKarmaCount;
+    boolean mIsNsfw;
+    int mCreatedUtc;
+    Boolean mIsLiked; // true == upvoted, false == downvoted, null == no vote
 
-    public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
-        @Override
-        public Post createFromParcel(Parcel source) {
-            return new Post(source);
-        }
-
-        @Override
-        public Post[] newArray(int size) {
-            return new Post[size];
-        }
-    };
-
+    // Empty constructor needed for Parceler library
     public Post() {}
 
-    private Post(Parcel in) {
-        mTitle = in.readString();
-        mUrl = in.readString();
-        mImageUrl = in.readString();
-        mCommentsUrl = in.readString();
-        mSubredditName = in.readString();
-        mCommentCount = in.readInt();
-        mKarmaCount = in.readInt();
-        boolean[] boolArray = new boolean[1];
-        in.readBooleanArray(boolArray);
-        mIsNsfw = boolArray[0];
-        mCreatedUtc = in.readInt();
+    public String getId() {
+        return mId;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mTitle);
-        dest.writeString(mUrl);
-        dest.writeString(mImageUrl);
-        dest.writeString(mCommentsUrl);
-        dest.writeString(mSubredditName);
-        dest.writeInt(mCommentCount);
-        dest.writeInt(mKarmaCount);
-        dest.writeBooleanArray(new boolean[]{mIsNsfw});
-        dest.writeInt(mCreatedUtc);
+    public void setId(String id) {
+        mId = id;
     }
 
     public String getTitle() {
@@ -133,5 +102,13 @@ public class Post implements Parcelable {
 
     public void setCreatedUtc(int createdUtc) {
         mCreatedUtc = createdUtc;
+    }
+
+    public Boolean isLiked() {
+        return mIsLiked;
+    }
+
+    public void setIsLiked(Boolean isLiked) {
+        mIsLiked = isLiked;
     }
 }
