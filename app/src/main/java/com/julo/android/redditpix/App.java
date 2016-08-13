@@ -10,6 +10,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        asdf
+
         Analytics.initializeAnalytics(this);
         Session.initInstance(getApplicationContext());
     }
