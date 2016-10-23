@@ -1,6 +1,7 @@
 package com.julo.android.redditpix.reddit;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.julo.android.redditpix.imgur.Imgur;
@@ -48,6 +49,10 @@ public class Reddit {
     private static final Uri ACCESS_TOKEN_API = API_ENDPOINT
             .buildUpon()
             .appendPath("access_token")
+            .build();
+    private static final Uri REVOKE_TOKEN_API = API_ENDPOINT
+            .buildUpon()
+            .appendPath("revoke_token")
             .build();
 
     private static final Uri OAUTH_ENDPOINT = Uri.parse("https://oauth.reddit.com");
@@ -210,7 +215,7 @@ public class Reddit {
         updateTokens(new Tokens(accessToken, refreshToken));
     }
 
-    private void updateTokens(Tokens tokens) {
+    private void updateTokens(@Nullable Tokens tokens) {
         mTokens = tokens;
         if (mListener != null) {
             mListener.onTokensChange(mTokens);
@@ -318,6 +323,35 @@ public class Reddit {
         JSONObject jsonData = new JSONObject(responseBody);
         updateTokens(jsonData.getString("access_token"), mTokens.getRefreshToken());
         return mTokens;
+    }
+
+    public void revokeTokens() throws IOException {
+        revokeToken(true /* access token */);
+        revokeToken(false /* refresh token */);
+        updateTokens(null);
+    }
+
+    private boolean revokeToken(boolean accessToken) throws IOException {
+        final String token = accessToken ? mTokens.getAccessToken() : mTokens.getRefreshToken();
+        final String tokenType = accessToken ? "access_token" : "refresh_token";
+        RequestBody body = new FormEncodingBuilder()
+                .add("token", token)
+                .add("token_type_hint", tokenType)
+                .build();
+        Request request = new Request.Builder()
+                .url(REVOKE_TOKEN_API.toString())
+                .header("Authorization", Credentials.basic(CLIENT_ID, ""))
+                .post(body)
+                .build();
+        Response response = mHttpClient.newCall(request).execute();
+
+        if (response.isSuccessful()) {
+            Log.d(TAG, "Revoking " + tokenType + " succeeded");
+            return true;
+        } else {
+            Log.e(TAG, "Revoking " + tokenType + " failed with code " + response.code());
+            return false;
+        }
     }
 
     public Listing<Post> fetchPosts(String subreddit) throws IOException, JSONException {

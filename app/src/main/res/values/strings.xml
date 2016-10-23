@@ -6,6 +6,7 @@
     <string name="subreddit_prompt">Enter subreddit name:</string>
     <string name="log_in">Log in</string>
     <string name="log_out">Log out</string>
+    <string name="logging_out">Logging out</string>
     <string name="no_image_posts">No image posts found :(</string>
     <string name="no_image_posts_in_subreddit">No image posts in r/%1$s :(</string>
     <string name="subreddit_freshness">Newest post: %1$s</string>

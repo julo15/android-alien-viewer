@@ -1,6 +1,7 @@
 package com.julo.android.redditpix.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -218,10 +219,7 @@ public class PostListFragment extends Fragment {
                 return true;
 
             case R.id.menu_item_log_out:
-                Session.getInstance().setNewTokens(null);
-                Preferences.setUserName(getActivity(), null);
-                getActivity().invalidateOptionsMenu();
-                fetchPosts(true /* refresh */);
+                new LogOutTask().execute();
                 return true;
 
             case R.id.menu_item_random_subreddit:
@@ -608,6 +606,36 @@ public class PostListFragment extends Fragment {
 
             setInfoBarText(infoText);
             showInfoBar(infoText != null);
+        }
+    }
+
+    private class LogOutTask extends AsyncTask<Void,Void,Void> {
+        ProgressDialog mProgressDialog;
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setMessage(getString(R.string.logging_out));
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                Session.getInstance().getReddit().revokeTokens();
+            } catch (IOException ioe) {
+                Log.e(TAG, "Exception thrown trying to revoke tokens", ioe);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mProgressDialog.hide();
+            Session.getInstance().setNewTokens(null);
+            Preferences.setUserName(getActivity(), null);
+            getActivity().invalidateOptionsMenu();
+            fetchPosts(true /* refresh */);
         }
     }
 }
