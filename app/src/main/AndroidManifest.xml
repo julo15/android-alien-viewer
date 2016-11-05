@@ -41,6 +41,11 @@
         <activity
             android:name="com.julo.android.redditpix.activities.ImagePagerActivity"
             android:theme="@style/AppThemeTranslucent" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="${fabricApiKey}" />
+
     </application>
 
 </manifest>
