@@ -23,6 +23,8 @@ import org.json.JSONObject;
  */
 public class Util {
 
+    private static final String REDDIT_UPLOADS_IMAGE_URL_BASE = "https://i.reddituploads.com";
+
     public static <T> T findView(View view, int id) {
         return (T)view.findViewById(id);
     }
@@ -65,6 +67,10 @@ public class Util {
 
     public static boolean isImgurAlbumUrl(String url) {
         return (Imgur.extractAlbumIdFromUrl(url) != null);
+    }
+
+    public static boolean isRedditUploadImageUrl(String url) {
+        return (url != null && url.startsWith(REDDIT_UPLOADS_IMAGE_URL_BASE));
     }
 
     public static CharSequence getRelativeTimeString(Context context, int utc) {

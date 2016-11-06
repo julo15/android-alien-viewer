@@ -11,12 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.julo.android.redditpix.R;
-import com.julo.android.redditpix.util.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by julianlo on 12/15/15.
@@ -26,6 +26,8 @@ public abstract class ImageFragment extends Fragment {
 
     @Bind(R.id.fragment_image_image_view) /*protected*/ ImageView mImageView;
     @Bind(R.id.fragment_image_progress_bar) View mProgressView;
+
+    PhotoViewAttacher mAttacher;
 
     @LayoutRes
     protected int getLayoutResId() {
@@ -60,6 +62,7 @@ public abstract class ImageFragment extends Fragment {
                     .into(mImageView, new Callback() {
                         @Override
                         public void onSuccess() {
+                            mAttacher.update();
                             mProgressView.setVisibility(View.GONE);
                         }
 
@@ -70,6 +73,8 @@ public abstract class ImageFragment extends Fragment {
                         }
                     });
         }
+
+        mAttacher = new PhotoViewAttacher(mImageView);
 
         return view;
     }

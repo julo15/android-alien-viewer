@@ -12,7 +12,7 @@
         android:layout_weight="1"
         android:layout_margin="@dimen/spacing_small">
 
-        <android.support.v4.view.ViewPager
+        <com.julo.android.redditpix.views.ViewPagerFixed
             android:id="@+id/activity_image_pager_view_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
@@ -47,7 +47,7 @@
             android:layout_gravity="center"
             android:layout_marginRight="@dimen/padding_normal">
 
-            <com.julo.android.redditpix.ToggleTextView
+            <com.julo.android.redditpix.views.ToggleTextView
                 android:id="@+id/activity_image_pager_up_vote_button"
                 android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
                 style="@style/VoteButtons"
                 android:text="▲"/>
 
-            <com.julo.android.redditpix.ToggleTextView
+            <com.julo.android.redditpix.views.ToggleTextView
                 android:id="@+id/activity_image_pager_karma_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
                 style="@style/VoteButtons"
                 tools:text="2034" />
 
-            <com.julo.android.redditpix.ToggleTextView
+            <com.julo.android.redditpix.views.ToggleTextView
                 android:id="@+id/activity_image_pager_down_vote_button"
                 android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"

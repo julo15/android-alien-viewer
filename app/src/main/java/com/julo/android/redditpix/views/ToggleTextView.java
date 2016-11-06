@@ -1,10 +1,12 @@
-package com.julo.android.redditpix;
+package com.julo.android.redditpix.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import com.julo.android.redditpix.R;
 
 /**
  * Created by julianlo on 1/14/16.

@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
-import com.julo.android.redditpix.ToggleTextView;
+import com.julo.android.redditpix.views.ToggleTextView;
 import com.julo.android.redditpix.fragments.ImageFragment;
 import com.julo.android.redditpix.imgur.Album;
 import com.julo.android.redditpix.imgur.Imgur;
@@ -26,6 +26,7 @@ import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -185,6 +186,8 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         String albumId = Imgur.extractAlbumIdFromUrl(mPost.getUrl());
         if (albumId != null) {
             new FetchImageUrlsTask().execute(albumId);
+        } else {
+            onImageUrlsLoaded(Collections.singletonList(mPost.getUrl()));
         }
     }
 
@@ -210,6 +213,12 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         mVoteTask.execute(vote);
     }
 
+    private void onImageUrlsLoaded(List<String> imageUrls) {
+        mImageUrls = imageUrls;
+        mViewPager.getAdapter().notifyDataSetChanged();
+        showTransitionImage(false);
+    }
+
     private class FetchImageUrlsTask extends AsyncTask<String,Void,List<String>> {
         @Override
         protected List<String> doInBackground(String... params) {
@@ -226,9 +235,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
 
         @Override
         protected void onPostExecute(List<String> strings) {
-            mImageUrls = strings;
-            mViewPager.getAdapter().notifyDataSetChanged();
-            showTransitionImage(false);
+            onImageUrlsLoaded(strings);
         }
     }
 

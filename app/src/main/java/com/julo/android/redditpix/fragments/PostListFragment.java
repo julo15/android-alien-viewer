@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.julo.android.redditpix.BlurTransformation;
-import com.julo.android.redditpix.EndlessRecyclerView;
+import com.julo.android.redditpix.views.EndlessRecyclerView;
 import com.julo.android.redditpix.Preferences;
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
