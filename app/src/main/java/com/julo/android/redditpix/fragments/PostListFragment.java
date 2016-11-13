@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -23,10 +24,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.julo.android.redditpix.BlurTransformation;
-import com.julo.android.redditpix.EndlessRecyclerView;
 import com.julo.android.redditpix.Preferences;
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
@@ -36,6 +35,7 @@ import com.julo.android.redditpix.reddit.Listing;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.reddit.Reddit;
 import com.julo.android.redditpix.util.Util;
+import com.julo.android.redditpix.views.EndlessRecyclerView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
@@ -305,10 +305,11 @@ public class PostListFragment extends Fragment {
         if (mFetchPostsTask != null) {
             mFetchPostsTask.cancel(false);
         }
-        mFetchPostsTask = new FetchPostsTask();
-        mFetchPostsTask.execute(refresh ?
-                mFetchContext.createParametersForRefresh() :
-                mFetchContext.createParametersForMore());
+        mFetchPostsTask = new FetchPostsTask(
+                refresh ?
+                    mFetchContext.createParametersForRefresh() :
+                    mFetchContext.createParametersForMore());
+        mFetchPostsTask.execute();
     }
 
     private void showProgress(final boolean show) {
@@ -521,24 +522,45 @@ public class PostListFragment extends Fragment {
         private FetchParameters mTaskFetchParameters;
         private String mRandomSubredditName;
 
+        public FetchPostsTask(FetchParameters fetchParameters) {
+            mTaskFetchParameters = fetchParameters;
+        }
+
         @Override
         protected void onPreExecute() {
             mFetchTaskState = FETCH_TASK_STATE_RUNNING;
             showProgress(true);
+
+            String infoText;
+            if (mTaskFetchParameters.findRandomSubreddit) {
+                infoText = getResources().getString(R.string.fetching_random_subreddit);
+            } else if (mTaskFetchParameters.subredditName != null) {
+                infoText = getResources().getString(R.string.fetching_subreddit_format, mTaskFetchParameters.subredditName);
+            } else if (Preferences.getUserName(getActivity()) != null) {
+                infoText = getResources().getString(R.string.fetching_front_page_with_name, Preferences.getUserName(getActivity()));
+            } else {
+                infoText = getResources().getString(R.string.fetching_front_page);
+            }
+
+            Snackbar.make(mRecyclerView, infoText, Snackbar.LENGTH_SHORT)
+                    .setAction(R.string.dismiss, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    })
+                    .show();
         }
 
         @Override
         protected Listing<Post> doInBackground(FetchParameters... params) {
             try {
-                FetchParameters fetchParams = params[0];
-                mTaskFetchParameters = fetchParams;
-
                 Reddit reddit = Session.getInstance().getReddit();
                 final int numPosts = 100;
 
-                if (fetchParams.subredditName != null) {
-                    return reddit.fetchPosts(fetchParams.subredditName, numPosts, mTaskFetchParameters.after, Util.IMAGE_POST_FILTERER);
-                } else if (fetchParams.findRandomSubreddit) {
+                if (mTaskFetchParameters.subredditName != null) {
+                    return reddit.fetchPosts(mTaskFetchParameters.subredditName, numPosts, mTaskFetchParameters.after, Util.IMAGE_POST_FILTERER);
+                } else if (mTaskFetchParameters.findRandomSubreddit) {
                     return reddit.fetchPosts("random", numPosts, mTaskFetchParameters.after, new Reddit.Filterer<Post>() {
                         @Override
                         public boolean filter(Post post) {
@@ -589,7 +611,7 @@ public class PostListFragment extends Fragment {
                     text = getResources().getString(R.string.no_image_posts);
                 }
 
-                Toast.makeText(getActivity(), text, Toast.LENGTH_LONG)
+                Snackbar.make(mRecyclerView, text, Snackbar.LENGTH_LONG)
                         .show();
             }
 

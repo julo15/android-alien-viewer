@@ -6,13 +6,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppThemeSplash" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppThemeNoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppThemeTranslucent" parent="AppTheme">
+    <style name="AppThemeTranslucentNoActionBar" parent="AppThemeNoActionBar">
         <item name="android:windowBackground">@color/darkened_background</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>

@@ -2,6 +2,7 @@ package com.julo.android.redditpix.reddit;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.text.Html;
 import android.util.Log;
 
 import com.julo.android.redditpix.imgur.Imgur;
@@ -449,7 +450,7 @@ public class Reddit {
         Post post = new Post();
         post.setId(itemJsonObject.getString("id"));
         post.setTitle(itemJsonObject.getString("title"));
-        post.setUrl(itemJsonObject.getString("url"));
+        post.setUrl(Html.fromHtml(itemJsonObject.getString("url")).toString());
         post.setCommentsUrl(itemJsonObject.getString("permalink"));
         post.setSubredditName(itemJsonObject.getString("subreddit"));
         post.setCommentCount(itemJsonObject.getInt("num_comments"));
@@ -487,7 +488,7 @@ public class Reddit {
     }
 
     private static String determinePostImageUrl(String postUrl) throws IOException, JSONException {
-        if (Util.isImageUrl(postUrl)) {
+        if (Util.isImageUrl(postUrl) || Util.isRedditUploadImageUrl(postUrl)) {
             return postUrl;
         }
 

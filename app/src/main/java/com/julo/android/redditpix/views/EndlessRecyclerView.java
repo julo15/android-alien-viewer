@@ -1,10 +1,8 @@
-package com.julo.android.redditpix;
+package com.julo.android.redditpix.views;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
-import android.util.Log;
 
 /**
  * Created by julianlo on 1/13/16.

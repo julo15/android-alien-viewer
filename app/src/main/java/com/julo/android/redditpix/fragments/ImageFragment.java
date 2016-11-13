@@ -5,18 +5,19 @@ import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.julo.android.redditpix.R;
-import com.julo.android.redditpix.util.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by julianlo on 12/15/15.
@@ -26,6 +27,8 @@ public abstract class ImageFragment extends Fragment {
 
     @Bind(R.id.fragment_image_image_view) /*protected*/ ImageView mImageView;
     @Bind(R.id.fragment_image_progress_bar) View mProgressView;
+
+    PhotoViewAttacher mAttacher;
 
     @LayoutRes
     protected int getLayoutResId() {
@@ -52,7 +55,15 @@ public abstract class ImageFragment extends Fragment {
 
         if (imageUrl != null) {
             mProgressView.setVisibility(View.VISIBLE);
-            Picasso.with(getActivity())
+            Picasso picasso = new Picasso.Builder(getActivity())
+                    .listener(new Picasso.Listener() {
+                        @Override
+                        public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                            Log.e(TAG, "Error loading", exception);
+                        }
+                    })
+                    .build();
+            picasso
                     .load(Uri.parse(imageUrl))
                     .fit()
                     .centerInside()
@@ -60,6 +71,7 @@ public abstract class ImageFragment extends Fragment {
                     .into(mImageView, new Callback() {
                         @Override
                         public void onSuccess() {
+                            mAttacher.update();
                             mProgressView.setVisibility(View.GONE);
                         }
 
@@ -70,6 +82,8 @@ public abstract class ImageFragment extends Fragment {
                         }
                     });
         }
+
+        mAttacher = new PhotoViewAttacher(mImageView);
 
         return view;
     }

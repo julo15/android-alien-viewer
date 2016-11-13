@@ -15,7 +15,10 @@ import android.widget.ImageView;
 
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.util.Util;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by julianlo on 12/15/15.
@@ -28,6 +31,7 @@ public class BaseImagePagerActivity extends AppCompatActivity {
     protected ViewPager mViewPager;
     protected ImageView mTransitionImageView;
     private View mTransitionImageParentView;
+    private PhotoViewAttacher mPhotoViewAttacher;
 
     protected static void putBaseExtras(Intent intent, String transitionImageUrl) {
         intent.putExtra(EXTRA_TRANSITION_IMAGE_URL, transitionImageUrl);
@@ -85,13 +89,25 @@ public class BaseImagePagerActivity extends AppCompatActivity {
             mTransitionImageView.setScaleType(ImageView.ScaleType.values()[getImageViewScaleType()]);
         }
 
+        mPhotoViewAttacher = new PhotoViewAttacher(mTransitionImageView);
+
         String imageUrl = getIntent().getStringExtra(EXTRA_TRANSITION_IMAGE_URL);
         if (imageUrl != null) {
             Picasso.with(this)
                     .load(Uri.parse(imageUrl))
                     .fit()
                     .centerInside()
-                    .into(mTransitionImageView);
+                    .into(mTransitionImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mPhotoViewAttacher.update();
+                        }
+
+                        @Override
+                        public void onError() {
+                            mPhotoViewAttacher.update();
+                        }
+                    });
         }
 
         new Handler().postDelayed(new Runnable() {

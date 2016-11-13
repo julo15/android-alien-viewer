@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.view.ViewPager
+    <com.julo.android.redditpix.views.ViewPagerFixed
         android:id="@+id/activity_base_image_pager_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
