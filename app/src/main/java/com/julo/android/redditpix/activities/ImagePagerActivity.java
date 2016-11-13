@@ -186,8 +186,6 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         String albumId = Imgur.extractAlbumIdFromUrl(mPost.getUrl());
         if (albumId != null) {
             new FetchImageUrlsTask().execute(albumId);
-        } else {
-            onImageUrlsLoaded(Collections.singletonList(mPost.getUrl()));
         }
     }
 

@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="com.julo.android.redditpix.activities.SplashActivity"
-            android:theme="@style/AppThemeSplash">
+            android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -36,11 +36,11 @@
         <activity android:name="com.julo.android.redditpix.activities.PostListActivity" />
         <activity
             android:name="com.julo.android.redditpix.activities.PostPagerActivity"
-            android:theme="@style/AppThemeTranslucent" />
+            android:theme="@style/AppThemeTranslucentNoActionBar" />
         <activity android:name="com.julo.android.redditpix.activities.WebViewActivity" />
         <activity
             android:name="com.julo.android.redditpix.activities.ImagePagerActivity"
-            android:theme="@style/AppThemeTranslucent" />
+            android:theme="@style/AppThemeTranslucentNoActionBar" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
