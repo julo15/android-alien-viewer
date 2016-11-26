@@ -55,15 +55,7 @@ public abstract class BaseImageFragment extends Fragment {
 
         if (imageUrl != null) {
             mProgressView.setVisibility(View.VISIBLE);
-            Picasso picasso = new Picasso.Builder(getActivity())
-                    .listener(new Picasso.Listener() {
-                        @Override
-                        public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                            Log.e(TAG, "Error loading", exception);
-                        }
-                    })
-                    .build();
-            picasso
+            Picasso.with(getActivity())
                     .load(Uri.parse(imageUrl))
                     .fit()
                     .centerInside()
