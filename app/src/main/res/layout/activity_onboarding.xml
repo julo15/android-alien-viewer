@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/onboarding_cardview_height"
+        android:layout_margin="@dimen/padding_normal"
+        android:layout_gravity="center">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/activity_onboarding_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/activity_onboarding_indicator" />
+
+            <com.julo.android.redditpix.views.ViewPagerIndicator
+                android:id="@+id/activity_onboarding_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/onboarding_indicator_height"
+                android:gravity="center"
+                android:layout_above="@+id/activity_onboarding_horizontal_separator"
+                app:dotSize="@dimen/indicator_dot_diameter"
+                app:dotMargin="@dimen/indicator_dot_margin"
+                app:selectedColor="@color/onboarding_dot_selected"
+                app:unselectedColor="@color/onboarding_dot_unselected" />
+
+            <View
+                android:id="@+id/activity_onboarding_horizontal_separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_above="@+id/activity_onboarding_skip_textview"
+                android:background="@color/onboarding_horizontal_separator" />
+            
+            <TextView
+                android:id="@+id/activity_onboarding_skip_textview"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/onboarding_skip_button_height"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                style="@style/OnboardingSkipTextAppearance"
+                android:text="@string/skip"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</FrameLayout>

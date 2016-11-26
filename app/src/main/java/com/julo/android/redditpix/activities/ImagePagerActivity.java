@@ -1,32 +1,35 @@
 package com.julo.android.redditpix.activities;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
-import com.julo.android.redditpix.views.ToggleTextView;
-import com.julo.android.redditpix.fragments.ImageFragment;
+import com.julo.android.redditpix.fragments.BaseImageFragment;
 import com.julo.android.redditpix.imgur.Album;
 import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.reddit.Reddit;
 import com.julo.android.redditpix.util.Util;
+import com.julo.android.redditpix.views.ToggleTextView;
+import com.julo.android.redditpix.views.ViewPagerIndicator;
 
 import org.json.JSONException;
 import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,8 +40,11 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
 
     public static final String EXTRA_POST = "com.julo.android.redditpix.post"; // used for input and results
 
+    private static final int PAGER_INDICATOR_ANIMATION_START_DELAY_MILLIS = 1500;
+    private static final int PAGER_INDICATOR_ANIMATION_DURATION_MILLIS = 700;
+
     private Post mPost;
-    private List<String> mImageUrls = new ArrayList<>();
+    private ViewPagerIndicator mViewPagerIndicator;
     private TextView mCommentsCountTextView;
     private TextView mTitleTextView;
     private TextView mSubredditTextView;
@@ -48,6 +54,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     private ToggleTextView mDownVoteButton;
     private View mLinkButton;
     private VoteTask mVoteTask;
+    private ObjectAnimator mViewPagerIndicatorAnimator;
 
     public static Intent newIntent(Context context, Post post, String imageUrl) {
         Intent intent = new Intent(context, ImagePagerActivity.class);
@@ -155,22 +162,19 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
             }
         });
 
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        mViewPager.setAdapter(new ImageFragmentPagerAdapter(getSupportFragmentManager()));
+        mViewPager.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public Fragment getItem(final int position) {
-                return new ImageFragment() {
-                    @Override
-                    protected String getImageUrl() {
-                        return mImageUrls.get(position);
-                    }
-                };
-            }
-
-            @Override
-            public int getCount() {
-                return mImageUrls.size();
+            public boolean onTouch(View v, MotionEvent event) {
+                showPagerIndicatorBriefly();
+                return false;
             }
         });
+
+        mViewPagerIndicator = Util.findView(this, R.id.activity_image_pager_indicator);
+        mViewPagerIndicator.attach(mViewPager);
+
+        showPagerIndicatorBriefly();
     }
 
     @Override
@@ -187,6 +191,18 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         if (albumId != null) {
             new FetchImageUrlsTask().execute(albumId);
         }
+    }
+
+    private void showPagerIndicatorBriefly() {
+        if (mViewPagerIndicatorAnimator != null) {
+            mViewPagerIndicatorAnimator.cancel();
+        }
+        mViewPagerIndicator.setAlpha(1f);
+        mViewPagerIndicatorAnimator = ObjectAnimator.ofFloat(mViewPagerIndicator, "alpha", 1f, 0f)
+                .setDuration(PAGER_INDICATOR_ANIMATION_DURATION_MILLIS);
+
+        mViewPagerIndicatorAnimator.setStartDelay(PAGER_INDICATOR_ANIMATION_START_DELAY_MILLIS);
+        mViewPagerIndicatorAnimator.start();
     }
 
     private void updateVoteButtonToggleStates() {
@@ -212,9 +228,56 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     }
 
     private void onImageUrlsLoaded(List<String> imageUrls) {
-        mImageUrls = imageUrls;
-        mViewPager.getAdapter().notifyDataSetChanged();
+        ((ImageFragmentPagerAdapter)mViewPager.getAdapter()).setImageUrls(imageUrls);
         showTransitionImage(false);
+    }
+
+    public static class ImageFragment extends BaseImageFragment {
+        private String mImageUrl;
+
+        public ImageFragment() {
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            super.onSaveInstanceState(outState);
+
+            // TODO: Save url
+        }
+
+        public ImageFragment setImageUrl(String url) {
+            mImageUrl = url;
+            return this;
+        }
+
+        @Override
+        protected String getImageUrl() {
+            return mImageUrl;
+        }
+    }
+
+    private static class ImageFragmentPagerAdapter extends FragmentStatePagerAdapter {
+        private List<String> mImageUrls = new ArrayList<>();
+
+        public ImageFragmentPagerAdapter(FragmentManager fragmentManager) {
+            super(fragmentManager);
+        }
+
+        public void setImageUrls(List<String> imageUrls) {
+            mImageUrls = imageUrls;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public Fragment getItem(final int position) {
+            return new ImageFragment()
+                    .setImageUrl(mImageUrls.get(position));
+        }
+
+        @Override
+        public int getCount() {
+            return mImageUrls.size();
+        }
     }
 
     private class FetchImageUrlsTask extends AsyncTask<String,Void,List<String>> {

@@ -22,13 +22,13 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 /**
  * Created by julianlo on 12/15/15.
  */
-public abstract class ImageFragment extends Fragment {
-    private static final String TAG = "ImageFragment";
+public abstract class BaseImageFragment extends Fragment {
+    private static final String TAG = "BaseImageFragment";
 
     @Bind(R.id.fragment_image_image_view) /*protected*/ ImageView mImageView;
     @Bind(R.id.fragment_image_progress_bar) View mProgressView;
 
-    PhotoViewAttacher mAttacher;
+    private PhotoViewAttacher mAttacher;
 
     @LayoutRes
     protected int getLayoutResId() {
@@ -79,6 +79,7 @@ public abstract class ImageFragment extends Fragment {
                         public void onError() {
                             mProgressView.setVisibility(View.GONE);
                             mImageView.setImageResource(android.R.drawable.ic_menu_delete);
+                            mAttacher.update();
                         }
                     });
         }
