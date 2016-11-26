@@ -24,13 +24,13 @@
             <com.julo.android.redditpix.views.ViewPagerIndicator
                 android:id="@+id/activity_onboarding_indicator"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/onboarding_indicator_height"
                 android:gravity="center"
                 android:layout_above="@+id/activity_onboarding_horizontal_separator"
                 app:dotSize="@dimen/indicator_dot_diameter"
                 app:dotMargin="@dimen/indicator_dot_margin"
-                app:selectedColor="#2176f5"
-                app:unselectedColor="#979797"/>
+                app:selectedColor="@color/onboarding_dot_selected"
+                app:unselectedColor="@color/onboarding_dot_unselected" />
 
             <View
                 android:id="@+id/activity_onboarding_horizontal_separator"
@@ -46,7 +46,7 @@
                 android:layout_alignParentBottom="true"
                 android:gravity="center"
                 style="@style/OnboardingSkipTextAppearance"
-                android:text="Skip"/>
+                android:text="@string/skip"/>
 
         </RelativeLayout>
 

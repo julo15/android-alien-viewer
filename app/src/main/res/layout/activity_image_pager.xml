@@ -39,8 +39,8 @@
             android:layout_margin="4dp"
             app:dotSize="@dimen/indicator_dot_diameter"
             app:dotMargin="@dimen/indicator_dot_margin"
-            app:selectedColor="#fff"
-            app:unselectedColor="#55ffffff" />
+            app:selectedColor="@color/image_pager_dot_selected"
+            app:unselectedColor="@color/image_pager_dot_unselected" />
 
     </FrameLayout>
 
