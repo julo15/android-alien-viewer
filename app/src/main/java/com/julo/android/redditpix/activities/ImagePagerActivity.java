@@ -17,7 +17,12 @@ import android.widget.Toast;
 
 import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
+<<<<<<< HEAD
 import com.julo.android.redditpix.fragments.BaseImageFragment;
+=======
+import com.julo.android.redditpix.views.ToggleTextView;
+import com.julo.android.redditpix.fragments.ImageFragment;
+>>>>>>> 78fd89fc4b388190a9538ae564bca76c9ada795a
 import com.julo.android.redditpix.imgur.Album;
 import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
@@ -31,6 +36,7 @@ import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -229,6 +235,7 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
     }
 
     private void onImageUrlsLoaded(List<String> imageUrls) {
+<<<<<<< HEAD
         ((ImageFragmentPagerAdapter)mViewPager.getAdapter()).setImageUrls(imageUrls);
         showTransitionImage(false);
     }
@@ -281,6 +288,13 @@ public class ImagePagerActivity extends BaseImagePagerActivity {
         }
     }
 
+=======
+        mImageUrls = imageUrls;
+        mViewPager.getAdapter().notifyDataSetChanged();
+        showTransitionImage(false);
+    }
+
+>>>>>>> 78fd89fc4b388190a9538ae564bca76c9ada795a
     private class FetchImageUrlsTask extends AsyncTask<String,Void,List<String>> {
         @Override
         protected List<String> doInBackground(String... params) {
