@@ -5,4 +5,10 @@
         <attr name="emphasizedTextColor" format="color" />
         <attr name="transitionTextColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="ViewPagerIndicator">
+        <attr name="unselectedColor" format="color" />
+        <attr name="selectedColor" format="color" />
+        <attr name="dotSize" format="dimension" />
+        <attr name="dotMargin" format="dimension" />
+    </declare-styleable>
 </resources>

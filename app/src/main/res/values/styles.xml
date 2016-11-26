@@ -62,7 +62,20 @@
         <item name="emphasizedTextColor">@color/colorAccent</item>
         <item name="transitionTextColor">@color/transition_vote</item>
         <item name="android:padding">@dimen/spacing_small</item>
+    </style>
 
+    <style name="OnboardingTitleTextAppearance" parent="TextAppearance.AppCompat.Title">
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="OnboardingDescriptionTextAppearance" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="OnboardingSkipTextAppearance" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>

@@ -40,4 +40,16 @@
     <string name="link_copied">Link copied to clipboard!</string>
     <string name="failed_to_send_vote">We had a problem sending your vote :(. Try logging out, logging back in, and trying again.</string>
     <string name="dismiss">Dismiss</string>
+
+    <string-array name="onboarding_titles">
+        <item>Welcome to the app!</item>
+        <item>Pinch-to-zoom images</item>
+        <item>Additional image sources</item>
+    </string-array>
+
+    <string-array name="onboarding_descriptions">
+        <item>This app is really awesome. If you don\'t believe me, use it for a bit and be amazed!</item>
+        <item>Now you can use your fingers to zoom an image in!</item>
+        <item>Images from Reddit Images now show up in the app!</item>
+    </string-array>
 </resources>

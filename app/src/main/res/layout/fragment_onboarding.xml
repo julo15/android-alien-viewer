@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/padding_normal">
+
+    <ImageView
+        android:id="@+id/fragment_onboarding_imageview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/fragment_onboarding_title_textview"
+        android:scaleType="center"
+        tools:src="@drawable/ic_collections_black_48dp"/>
+
+    <TextView
+        android:id="@+id/fragment_onboarding_title_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fragment_onboarding_desc_textview"
+        android:layout_marginBottom="@dimen/onboarding_section_vertical_spacing"
+        style="@style/OnboardingTitleTextAppearance"
+        tools:text="Welcome to the app"/>
+
+    <TextView
+        android:id="@+id/fragment_onboarding_desc_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/onboarding_section_vertical_spacing"
+        style="@style/OnboardingDescriptionTextAppearance"
+        tools:text="This app is really awesome. If you don't believe me, use it for a bit and be amazed!"/>
+
+</RelativeLayout>

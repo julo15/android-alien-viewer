@@ -31,6 +31,7 @@ import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.Session;
 import com.julo.android.redditpix.activities.AuthorizeActivity;
 import com.julo.android.redditpix.activities.ImagePagerActivity;
+import com.julo.android.redditpix.activities.OnboardingActivity;
 import com.julo.android.redditpix.reddit.Listing;
 import com.julo.android.redditpix.reddit.Post;
 import com.julo.android.redditpix.reddit.Reddit;

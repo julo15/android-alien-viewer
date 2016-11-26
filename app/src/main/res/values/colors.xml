@@ -9,4 +9,5 @@
     <color name="link_text">#3366ff</color>
     <color name="placeholder_background">#5da8db</color>
     <color name="transition_vote">#a18566</color>
+    <color name="onboarding_horizontal_separator">#f2f2f2</color>
 </resources>

@@ -12,7 +12,6 @@ import com.julo.android.redditpix.R;
 import com.julo.android.redditpix.activities.ImagePagerActivity;
 import com.julo.android.redditpix.imgur.Imgur;
 import com.julo.android.redditpix.reddit.Post;
-import com.julo.android.redditpix.util.Util;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -20,7 +19,7 @@ import butterknife.ButterKnife;
 /**
  * Created by julianlo on 12/12/15.
  */
-public class PostFragment extends ImageFragment {
+public class PostFragment extends BaseImageFragment {
     private static final String TAG = "PostFragment";
 
     private static final String ARG_POST_INDEX = "post_index";
