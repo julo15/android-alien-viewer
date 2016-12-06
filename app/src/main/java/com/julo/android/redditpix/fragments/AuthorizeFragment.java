@@ -20,6 +20,7 @@ public class AuthorizeFragment extends BaseWebViewFragment {
     private static final String TAG = "AuthorizeFragment";
 
     private Callbacks mCallbacks;
+    private boolean mCodeSent;
 
     public interface Callbacks {
         void onCodeRetrieved(String code);
@@ -68,6 +69,10 @@ public class AuthorizeFragment extends BaseWebViewFragment {
     }
 
     private void sendResult(String code) {
-        mCallbacks.onCodeRetrieved(code);
+        if (!mCodeSent) {
+            // On an API 16 emulator, the webview will call this twice.
+            mCallbacks.onCodeRetrieved(code);
+            mCodeSent = true;
+        }
     }
 }
